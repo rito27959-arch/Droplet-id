@@ -192,12 +192,15 @@ private fun Formulaire(
                     }
                 }
                 if (d.demandeProfil && partager) {
-                    GlasmioTextField(
-                        value = pseudo,
-                        onValueChange = { pseudo = it.take(40) },
-                        placeholder = "Pseudo pour ${d.nomApp}",
-                        modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
-                    )
+                    // Le champ dans son propre îlot : visible comme un champ, pas comme du texte.
+                    GlasmioGroupedList(Modifier.padding(top = 10.dp)) {
+                        GlasmioTextField(
+                            value = pseudo,
+                            onValueChange = { pseudo = it.take(40) },
+                            placeholder = "Pseudo pour ${d.nomApp}",
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                 }
             }
             if (!appareil.verrouEcran) {

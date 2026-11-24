@@ -3,6 +3,6 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: process.env.SITE_URL || 'https://droplet-id-site.vercel.app',
+  site: process.env.SITE_URL || 'https://dropletid.dropletmesh.app',
   base: process.env.BASE_PATH || '/',
 });

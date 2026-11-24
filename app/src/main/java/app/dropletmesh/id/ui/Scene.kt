@@ -15,6 +15,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import app.dropletmesh.id.designsystem.RougeBoucle
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -105,11 +109,23 @@ fun animationsReduites(): Boolean {
 
 /** Le bouton principal des scènes : en métal, texte noir, comme sur le site. */
 @Composable
-fun BoutonMetal(texte: String, onClick: () -> Unit, modifier: Modifier = Modifier, actif: Boolean = true) {
+fun BoutonMetal(texte: String, onClick: () -> Unit, modifier: Modifier = Modifier, actif: Boolean = true, brille: Boolean = false) {
     val retour = LocalHapticFeedback.current
+    // Un reflet passe sur le métal toutes les trois secondes environ.
+    val reflet = if (brille && actif) {
+        val transition = androidx.compose.animation.core.rememberInfiniteTransition(label = "reflet")
+        transition.animateFloat(-0.4f, 1.8f, androidx.compose.animation.core.infiniteRepeatable(tween(2800, easing = LinearEasing)), label = "reflet").value
+    } else null
     Box(
         modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(999.dp))
             .background(if (actif) Metal else Brush.verticalGradient(listOf(GraphiteScene, GraphiteScene)))
+            .drawWithContent {
+                drawContent()
+                if (reflet != null && reflet in 0f..1.4f) {
+                    val x = size.width * reflet
+                    drawRect(Brush.linearGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.55f), Color.Transparent), Offset(x - 90f, 0f), Offset(x + 90f, size.height)))
+                }
+            }
             .clickable(enabled = actif, role = Role.Button) { retour.performHapticFeedback(HapticFeedbackType.ContextClick); onClick() },
         contentAlignment = Alignment.Center,
     ) {
@@ -221,23 +237,130 @@ fun Ouverture(onFin: () -> Unit, figer: Float? = null) {
 }
 
 // ----------------------------------------------------------------------------
-// LA PRÉSENTATION
+// LA PRÉSENTATION — le principe de l'onboarding de Telegram, réécrit pour
+// Droplet ID (aucun code repris) :
+//   - l'illustration est FIXE au-dessus des textes ; seuls les textes glissent ;
+//   - l'illustration suit le doigt en continu : ses 700 grains d'argent passent
+//     d'une forme à l'autre (cœur → empreinte → réseau), en s'envolant un peu
+//     et en tournant pendant le trajet, dans le sens du geste ;
+//   - quand la page se pose, une animation propre à la page se joue (la
+//     ceinture se boucle, un balayage lit l'empreinte, les apps apparaissent) ;
+//   - des traits de pagination qui s'étirent, un bouton en métal qui brille.
 // ----------------------------------------------------------------------------
 
 private data class PagePresentation(val titre: String, val texte: String)
 
 private val pagesPresentation = listOf(
     PagePresentation("Votre identité.\nBouclée.", "Une seule identité pour Droplet Messenger, Droplet Drop et Kunfox. Elle vit dans ce téléphone, et nulle part ailleurs."),
-    PagePresentation("Sans mot de passe.\nSans e-mail.", "Pour vous connecter, vous vérifiez un nombre et vous approuvez d'un geste. Rien à retenir, rien à voler."),
+    PagePresentation("Sans mot de passe.\nSans e-mail.", "Pour vous connecter, vous vérifiez un nombre et vous approuvez avec votre empreinte. Rien à retenir, rien à voler."),
     PagePresentation("Un identifiant\npar app.", "Chaque app reçoit un identifiant qui ne vaut que pour elle. Vous retirez un accès quand vous voulez."),
 )
+
+/** Les trois formes, en coordonnées 512 × 512 : n points chacune (x, y entrelacés). */
+private fun formesPresentation(n: Int): List<FloatArray> {
+    val coeur = ArrayList<Pair<Float, Float>>()
+    val region = android.graphics.Region().apply { setPath(cheminCoeur().asAndroidPath(), android.graphics.Region(0, 0, 512, 512)) }
+    var y = 140f
+    while (y < 384f) { var x = 118f; while (x < 394f) { if (region.contains(x.toInt(), y.toInt())) coeur += x to y; x += 7f }; y += 7f }
+
+    // L'empreinte : des boucles concentriques, ouvertes vers le bas.
+    val empreinte = ArrayList<Pair<Float, Float>>()
+    for (i in 0 until 8) {
+        val r = 22f + i * 19f
+        val (debut, fin) = if (i < 2) 0f to 360f else (150f - i * 2f) to (390f + i * 2f)
+        val pas = 6.5f / r * (180f / PI.toFloat())
+        var a = debut
+        while (a <= fin) {
+            val rad = a * PI.toFloat() / 180f
+            empreinte += (256f + r * cos(rad)) to (262f + r * 1.22f * sin(rad))
+            a += pas
+        }
+    }
+
+    // Le réseau : un nœud central, trois nœuds, des fils.
+    val reseau = ArrayList<Pair<Float, Float>>()
+    fun anneau(cx: Float, cy: Float, r: Float) { var a = 0f; while (a < 360f) { val rad = a * PI.toFloat() / 180f; reseau += (cx + r * cos(rad)) to (cy + r * sin(rad)); a += 360f / (r * 0.9f) } }
+    fun fil(x1: Float, y1: Float, x2: Float, y2: Float) { val l = kotlin.math.hypot(x2 - x1, y2 - y1); var d = 0f; while (d < l) { reseau += (x1 + (x2 - x1) * d / l) to (y1 + (y2 - y1) * d / l); d += 8f } }
+    val noeuds = listOf(256f to 96f, 112f to 384f, 400f to 384f)
+    anneau(256f, 262f, 46f); anneau(256f, 262f, 30f)
+    for ((nx, ny) in noeuds) {
+        anneau(nx, ny, 36f)
+        val dx = nx - 256f; val dy = ny - 262f; val l = kotlin.math.hypot(dx, dy)
+        fil(256f + dx / l * 52f, 262f + dy / l * 52f, nx - dx / l * 42f, ny - dy / l * 42f)
+    }
+
+    val alea = Random(7)
+    return listOf(coeur, empreinte, reseau).map { points ->
+        val melange = points.shuffled(alea)
+        FloatArray(2 * n).also { out ->
+            for (k in 0 until n) {
+                val (px, py) = melange[k % melange.size]
+                val bruit = if (k >= melange.size) 2.5f else 0f
+                out[2 * k] = px + (alea.nextFloat() - 0.5f) * bruit
+                out[2 * k + 1] = py + (alea.nextFloat() - 0.5f) * bruit
+            }
+        }
+    }
+}
+
+/** Les nœuds du réseau, là où se posent les icônes des apps (512 × 512). */
+private val noeudsApps = listOf(256f to 96f, 112f to 384f, 400f to 384f)
 
 @Composable
 fun Presentation(onTerminer: () -> Unit) {
     val etat = rememberPagerState { pagesPresentation.size }
     val portee = rememberCoroutineScope()
     val reduit = animationsReduites()
-    val position = etat.currentPage + etat.currentPageOffsetFraction
+    val retour = LocalHapticFeedback.current
+    val n = 700
+    val formes = remember { formesPresentation(n) }
+    val retards = remember { val r = Random(11); FloatArray(n) { r.nextFloat() } }
+
+    // La position continue du pager, comme le « scroll offset » qui pilote l'illustration.
+    val position = (etat.currentPage + etat.currentPageOffsetFraction).coerceIn(0f, (pagesPresentation.size - 1).toFloat())
+    val posee = etat.settledPage
+    val immobile = !etat.isScrollInProgress && abs(position - posee) < 0.01f
+
+    // L'horloge des animations au repos (respiration des grains, balayage).
+    var horloge by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(reduit) {
+        if (reduit) return@LaunchedEffect
+        val debut = withFrameNanos { it }
+        while (true) withFrameNanos { horloge = (it - debut) / 1e9f }
+    }
+
+    // Une petite impulsion quand une page se pose (vibration légère).
+    val impulsion = remember { Animatable(1f) }
+    LaunchedEffect(posee) {
+        if (reduit) return@LaunchedEffect
+        retour.performHapticFeedback(HapticFeedbackType.SegmentTick)
+        impulsion.snapTo(0f); impulsion.animateTo(1f, spring(dampingRatio = 0.55f, stiffness = 260f))
+    }
+
+    // Page 1 : la ceinture se boucle une fois la page posée.
+    val boucle = remember { Animatable(if (reduit) 1f else 0f) }
+    val eclat = remember { Animatable(0f) }
+    LaunchedEffect(posee) {
+        if (posee == 0 && !reduit) {
+            boucle.snapTo(0f); eclat.snapTo(0f)
+            kotlinx.coroutines.delay(420)
+            boucle.animateTo(1f, tween(620))
+            retour.performHapticFeedback(HapticFeedbackType.Confirm)
+            eclat.animateTo(1f, tween(650))
+        }
+    }
+    // Page 2 : le balayage qui lit l'empreinte ; page 3 : les apps se posent.
+    val lecture = remember { Animatable(0f) }
+    val apps = remember { Animatable(if (reduit) 1f else 0f) }
+    LaunchedEffect(posee) {
+        if (reduit) return@LaunchedEffect
+        if (posee == 1) { lecture.snapTo(0f); kotlinx.coroutines.delay(200); lecture.animateTo(1f, tween(1400, easing = LinearEasing)) }
+        if (posee == 2) { apps.snapTo(0f); kotlinx.coroutines.delay(150); apps.animateTo(1f, tween(900)) }
+    }
+
+    val logoVisible by animateFloatAsState(if (immobile && posee == 0 || reduit && posee == 0) 1f else 0f, tween(if (immobile) 450 else 160), label = "logo")
+    val appsVisibles = if (posee == 2 && immobile) apps.value else 0f
+
     FondScene(lumiere = position / 2f) {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalArrangement = Arrangement.End) {
@@ -247,38 +370,92 @@ fun Presentation(onTerminer: () -> Unit) {
                     style = TextStyle(fontFamily = TexteDroplet, fontSize = 16.sp, fontWeight = FontWeight.Medium), color = ArgentScene2,
                 )
             }
-            HorizontalPager(etat, Modifier.weight(1f).fillMaxWidth()) { i ->
-                val ecart = (etat.currentPage - i) + etat.currentPageOffsetFraction // 0 = page au centre
-                val presence = borne(1f - abs(ecart))
-                Column(
-                    Modifier.fillMaxSize().padding(horizontal = 28.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Box(
-                        Modifier.fillMaxWidth().aspectRatio(1.15f).graphicsLayer {
-                            rotationY = ecart * -28f; cameraDistance = 14f * density; translationX = ecart * 160f; alpha = 0.3f + 0.7f * presence
-                        },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        when (i) {
-                            0 -> IllustrationLogo(etat, reduit)
-                            1 -> IllustrationCode(presence, reduit)
-                            else -> IllustrationApps(presence, reduit)
+
+            // L'ILLUSTRATION, FIXE : seuls les grains bougent.
+            Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Box(Modifier.fillMaxWidth(0.8f).aspectRatio(1f).graphicsLayer {
+                    val i = impulsion.value; scaleX = 0.96f + 0.04f * i; scaleY = scaleX
+                }) {
+                    Canvas(Modifier.fillMaxSize()) {
+                        val k = size.minDimension / 512f
+                        val i0 = position.toInt().coerceAtMost(pagesPresentation.size - 2)
+                        val fr = position - i0
+                        val a = formes[i0]; val b = formes[i0 + 1]
+                        val sens = if (etat.currentPageOffsetFraction >= 0f) 1f else -1f
+                        val voile = 1f - logoVisible * 0.92f
+                        for (q in 0 until n) {
+                            val d = retards[q]
+                            val t = doux(plage(fr, d * 0.3f, d * 0.3f + 0.7f))
+                            val vol = sin(PI.toFloat() * t)
+                            var x = a[2 * q] + (b[2 * q] - a[2 * q]) * t - 256f
+                            var y = a[2 * q + 1] + (b[2 * q + 1] - a[2 * q + 1]) * t - 262f
+                            // L'envol : les grains s'écartent du centre au milieu du trajet…
+                            val ecart = 1f + vol * (0.35f + d * 0.5f)
+                            x *= ecart; y *= ecart
+                            // … et tournent autour de l'axe vertical, dans le sens du geste.
+                            val ang = vol * 1.1f * sens
+                            var z = (d - 0.5f) * 140f * vol
+                            val ca = cos(ang); val sa = sin(ang)
+                            val nx = x * ca + z * sa; z = -x * sa + z * ca; x = nx
+                            // La respiration au repos.
+                            if (!reduit) { x += sin(horloge * 1.3f + d * 40f) * 1.6f; y += cos(horloge * 1.1f + d * 30f) * 1.6f }
+                            val persp = 1f / (1f + (z / 512f).coerceIn(-0.6f, 2f))
+                            val px = (256f + x * persp) * k; val py = (262f + y * persp) * k
+                            // Le balayage de l'empreinte allume les grains qu'il traverse.
+                            val ligne = 120f + lecture.value * 300f
+                            val lu = if (posee == 1 && immobile && lecture.value in 0.001f..0.999f) borne(1f - abs(a[2 * q + 1] - ligne) / 26f) else 0f
+                            val alpha = borne(persp * (0.55f + 0.45f * (1f - vol)) * voile + lu * 0.6f)
+                            drawCircle(if (lu > 0.3f) Color.White else ArgentScene, (1.25f + 1.1f * persp + lu * 0.9f) * k * 2f, Offset(px, py), alpha)
+                        }
+                        if (posee == 1 && immobile && lecture.value in 0.001f..0.999f) {
+                            val yl = (120f + lecture.value * 300f) * k
+                            drawLine(
+                                Brush.horizontalGradient(listOf(Color.Transparent, RougeBoucle, Color.Transparent), 60f * k, 452f * k),
+                                Offset(60f * k, yl), Offset(452f * k, yl), strokeWidth = 2.dp.toPx(),
+                            )
                         }
                     }
-                    Spacer(Modifier.height(32.dp))
+                    // Page 1 : le vrai logo se pose sur le cœur de grains, et se boucle.
+                    if (logoVisible > 0f) {
+                        Box(Modifier.fillMaxSize().graphicsLayer { alpha = logoVisible; scaleX = 0.92f + logoVisible * 0.08f; scaleY = scaleX }.clip(RoundedCornerShape(30))) {
+                            LogoCeinture(Modifier.fillMaxSize(), boucle = boucle.value, eclat = eclat.value)
+                        }
+                    }
+                    // Page 3 : les icônes des apps se posent sur les nœuds.
+                    if (appsVisibles > 0f) {
+                        val icones = listOf(R.drawable.app_messenger, R.drawable.app_drop, R.drawable.app_kunfox)
+                        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
+                            val unite = maxWidth / 512f
+                            noeudsApps.forEachIndexed { j, (nx, ny) ->
+                                val q = doux(plage(appsVisibles, j * 0.15f, 0.55f + j * 0.15f))
+                                Image(
+                                    painterResource(icones[j]), null,
+                                    Modifier.offset(unite * (nx - 30f), unite * (ny - 30f)).size(unite * 60f)
+                                        .graphicsLayer { alpha = q; scaleX = 0.6f + 0.4f * q; scaleY = scaleX }
+                                        .clip(RoundedCornerShape(percent = 26)),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // LES TEXTES, SEULS À GLISSER.
+            HorizontalPager(etat, Modifier.fillMaxWidth().height(200.dp)) { i ->
+                val ecart = (etat.currentPage - i) + etat.currentPageOffsetFraction
+                val presence = borne(1f - abs(ecart) * 1.4f)
+                Column(Modifier.fillMaxSize().padding(horizontal = 28.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     val p = pagesPresentation[i]
                     Text(
                         p.titre,
-                        Modifier.semantics { heading() }.graphicsLayer { translationX = ecart * 60f; alpha = presence },
+                        Modifier.semantics { heading() }.graphicsLayer { alpha = presence },
                         style = TextStyle(fontFamily = TitresDroplet, fontSize = 32.sp, lineHeight = 35.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.03).em, textAlign = TextAlign.Center),
                         color = Color.White,
                     )
                     Spacer(Modifier.height(14.dp))
                     Text(
                         p.texte,
-                        Modifier.graphicsLayer { translationX = ecart * 110f; alpha = presence },
+                        Modifier.graphicsLayer { alpha = presence; translationX = ecart * 40f },
                         style = TextStyle(fontFamily = TexteDroplet, fontSize = 16.sp, lineHeight = 23.sp, textAlign = TextAlign.Center),
                         color = ArgentScene2,
                     )
@@ -288,8 +465,9 @@ fun Presentation(onTerminer: () -> Unit) {
             val derniere = etat.currentPage == pagesPresentation.lastIndex
             BoutonMetal(
                 if (derniere) "Commencer" else "Continuer",
-                onClick = { if (derniere) onTerminer() else portee.launch { etat.animateScrollToPage(etat.currentPage + 1) } },
+                onClick = { if (derniere) onTerminer() else portee.launch { etat.animateScrollToPage(etat.currentPage + 1, animationSpec = tween(520)) } },
                 modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp),
+                brille = !reduit,
             )
         }
     }
@@ -308,82 +486,3 @@ private fun Indicateur(position: Float, n: Int) {
         }
     }
 }
-
-/** Page 1 : le logo ; la ceinture se boucle quand la page s'installe. */
-@Composable
-private fun IllustrationLogo(etat: PagerState, reduit: Boolean) {
-    val retour = LocalHapticFeedback.current
-    val boucle = remember { Animatable(if (reduit) 1f else 0f) }
-    val eclat = remember { Animatable(0f) }
-    LaunchedEffect(etat.settledPage) {
-        if (etat.settledPage == 0 && !reduit) {
-            boucle.snapTo(0f); eclat.snapTo(0f)
-            kotlinx.coroutines.delay(350)
-            boucle.animateTo(1f, tween(650))
-            retour.performHapticFeedback(HapticFeedbackType.Confirm)
-            eclat.animateTo(1f, tween(650))
-        }
-    }
-    Box(Modifier.fillMaxWidth(0.62f).aspectRatio(1f).clip(RoundedCornerShape(30))) {
-        LogoCeinture(Modifier.fillMaxSize(), boucle = boucle.value, eclat = eclat.value)
-    }
-}
-
-/** Page 2 : le nombre à vérifier ; ses chiffres arrivent un à un. */
-@Composable
-private fun IllustrationCode(presence: Float, reduit: Boolean) {
-    val arrivee by animateFloatAsState(if (presence > 0.6f || reduit) 1f else 0f, tween(900), label = "code")
-    Column(
-        Modifier.fillMaxWidth(0.86f).clip(RoundedCornerShape(28.dp))
-            .background(Brush.verticalGradient(listOf(Color(0xFF1D1E23), Color(0xFF111215))))
-            .padding(vertical = 28.dp, horizontal = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Image(painterResource(R.drawable.app_kunfox), null, Modifier.size(52.dp).clip(RoundedCornerShape(13.dp)))
-        Spacer(Modifier.height(12.dp))
-        Text("Se connecter à Kunfox ?", style = TextStyle(fontFamily = TitresDroplet, fontSize = 18.sp, fontWeight = FontWeight.Bold), color = Color.White)
-        Text("kunfox.app", style = TextStyle(fontFamily = TexteDroplet, fontSize = 13.sp), color = ArgentScene2)
-        Spacer(Modifier.height(18.dp))
-        Row {
-            "482 913".forEachIndexed { i, ch ->
-                val q = doux(plage(arrivee, i * 0.09f, 0.4f + i * 0.09f))
-                Text(
-                    ch.toString(),
-                    Modifier.graphicsLayer { alpha = q; translationY = (1 - q) * 28f },
-                    style = TextStyle(fontFamily = TitresDroplet, fontSize = 40.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.04.em, fontFeatureSettings = "tnum"),
-                    color = Color.White,
-                )
-            }
-        }
-        Spacer(Modifier.height(6.dp))
-        Text("Le nombre affiché sur kunfox.app", style = TextStyle(fontFamily = TexteDroplet, fontSize = 12.sp), color = ArgentScene2)
-    }
-}
-
-/** Page 3 : un fil part du logo vers chaque app et se trace. */
-@Composable
-private fun IllustrationApps(presence: Float, reduit: Boolean) {
-    val trace by animateFloatAsState(if (presence > 0.6f || reduit) 1f else 0f, tween(1100), label = "fils")
-    val apps = listOf(R.drawable.app_messenger, R.drawable.app_drop, R.drawable.app_kunfox)
-    Box(Modifier.fillMaxSize()) {
-        Canvas(Modifier.fillMaxSize()) {
-            val haut = Offset(size.width / 2, size.height * 0.24f)
-            listOf(0.16f, 0.5f, 0.84f).forEachIndexed { i, fx ->
-                val bas = Offset(size.width * fx, size.height * 0.74f)
-                val q = plage(trace, i * 0.12f, 0.6f + i * 0.12f)
-                val fin = Offset(haut.x + (bas.x - haut.x) * q, haut.y + (bas.y - haut.y) * q)
-                drawLine(ArgentScene.copy(alpha = 0.5f), haut, fin, strokeWidth = 1.5.dp.toPx(), cap = StrokeCap.Round)
-            }
-        }
-        Box(Modifier.align(Alignment.TopCenter).offset(y = 0.dp).size(92.dp).clip(RoundedCornerShape(30))) {
-            LogoCeinture(Modifier.fillMaxSize())
-        }
-        Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(bottom = 8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-            apps.forEachIndexed { i, res ->
-                val q = doux(plage(trace, 0.45f + i * 0.12f, 0.85f + i * 0.12f))
-                Image(painterResource(res), null, Modifier.size(58.dp).graphicsLayer { alpha = q; scaleX = 0.7f + 0.3f * q; scaleY = scaleX }.clip(RoundedCornerShape(15.dp)))
-            }
-        }
-    }
-}
-

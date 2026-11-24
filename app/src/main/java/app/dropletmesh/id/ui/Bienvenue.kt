@@ -10,6 +10,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -90,8 +92,21 @@ fun Presentation(onTerminer: () -> Unit) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Box(Modifier.size(96.dp).clip(CircleShape).background(c.surface), contentAlignment = Alignment.Center) {
-                    GlasmioIcon(p.icone, contentDescription = null, tint = if (i == 1) c.laiton else c.texte, size = 44.dp)
+                if (i == 0) {
+                    CarteIdentite(
+                        compteId = "DROPLETIDEXEMPLE",
+                        ligneBas = "Votre identité",
+                        ligneBasDroite = "Ce téléphone",
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                    )
+                } else {
+                    Box(
+                        Modifier.size(120.dp).clip(RoundedCornerShape(32.dp)).background(c.surface)
+                            .border(1.dp, c.bordure, RoundedCornerShape(32.dp)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        GlasmioIcon(p.icone, contentDescription = null, tint = if (i == 1) c.laiton else c.texte, size = 56.dp)
+                    }
                 }
                 Spacer(Modifier.height(36.dp))
                 Text(
@@ -144,8 +159,13 @@ fun Bienvenue(ui: UiApp, onActiver: () -> Unit) {
         Spacer(Modifier.height(12.dp))
         Corps("Elle tient dans ce téléphone : une clé que personne d'autre ne possède, pas même Droplet.", secondaire = true)
         Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.weight(0.6f))
         // La carte, encore vierge : l'objet qu'on va créer.
         CarteIdentite(compteId = null, ligneBas = "Pas encore activée", ligneBasDroite = ui.appareil.modele, verifiee = false)
+        Spacer(Modifier.height(28.dp))
+        Garantie(Icone.PASSKEY, "Une clé créée ici, qui ne quitte jamais ce téléphone")
+        Garantie(Icone.VISIBILITE, "Ni numéro, ni e-mail, ni nom")
+        Garantie(Icone.APPS, "Un identifiant différent pour chaque app")
         Spacer(Modifier.weight(1f))
         AnimatedContent(ui.erreurActivation, transitionSpec = { fadeIn() togetherWith fadeOut() }, label = "erreur") { e ->
             if (e != null) {
@@ -156,18 +176,21 @@ fun Bienvenue(ui: UiApp, onActiver: () -> Unit) {
                 }
             }
         }
-        Text(
-            "Rien de personnel n'est envoyé : ni numéro, ni e-mail, ni nom.",
-            Modifier.fillMaxWidth().padding(bottom = 14.dp),
-            style = TextStyle(fontFamily = SansTexte, fontSize = 14.sp, lineHeight = 20.sp),
-            color = c.texteSecondaire,
-            textAlign = TextAlign.Center,
-        )
         BoutonPrincipal(
             if (ui.activation) "Création de votre clé…" else "Créer mon Droplet ID",
             onClick = onActiver,
             actif = !ui.activation,
             modifier = Modifier.padding(bottom = 16.dp),
         )
+    }
+}
+
+@Composable
+private fun Garantie(icone: String, texte: String) {
+    val c = Droplet.couleurs
+    Row(Modifier.fillMaxWidth().padding(vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
+        GlasmioIcon(icone, contentDescription = null, tint = c.laiton, size = 22.dp)
+        Spacer(Modifier.width(14.dp))
+        Text(texte, style = TextStyle(fontFamily = SansTexte, fontSize = 16.sp, lineHeight = 22.sp), color = c.texte)
     }
 }

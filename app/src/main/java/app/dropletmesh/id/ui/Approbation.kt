@@ -231,22 +231,22 @@ private fun ChampCode(valeur: String, onChange: (String) -> Unit, modifier: Modi
     BasicTextField(
         value = valeur,
         onValueChange = onChange,
-        modifier = modifier.semantics { contentDescription = "Nombre à deux chiffres" },
+        modifier = modifier.fillMaxWidth().semantics { contentDescription = "Nombre à deux chiffres" },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
         textStyle = TextStyle(fontFamily = MonoIdentifiants, fontSize = 1.sp, color = c.fond),
         cursorBrush = SolidColor(c.fond),
         decorationBox = { interne ->
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally)) {
                 repeat(2) { i ->
                     val chiffre = valeur.getOrNull(i)?.toString().orEmpty()
                     val actif = i == valeur.length.coerceAtMost(1)
                     Box(
-                        Modifier.size(width = 72.dp, height = 84.dp).clip(RoundedCornerShape(18.dp)).background(c.surface)
+                        Modifier.size(width = 84.dp, height = 100.dp).clip(RoundedCornerShape(18.dp)).background(c.surface)
                             .border(if (actif) 2.dp else 1.dp, if (actif) c.laiton else c.bordure, RoundedCornerShape(18.dp)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(chiffre, style = TextStyle(fontFamily = MonoIdentifiants, fontSize = 40.sp, fontWeight = FontWeight.Medium), color = c.texte)
+                        Text(chiffre, style = TextStyle(fontFamily = MonoIdentifiants, fontSize = 46.sp, fontWeight = FontWeight.Medium), color = c.texte)
                     }
                 }
                 Box(Modifier.size(1.dp)) { interne() }

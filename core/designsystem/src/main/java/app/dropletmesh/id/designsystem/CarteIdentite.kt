@@ -6,6 +6,7 @@
 package app.dropletmesh.id.designsystem
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,6 +56,7 @@ fun CarteIdentite(
             .shadow(12.dp, forme, ambientColor = Color.Black.copy(alpha = 0.10f), spotColor = Color.Black.copy(alpha = 0.10f))
             .clip(forme)
             .background(NoirCarte)
+            .border(0.75.dp, LaitonCarte.copy(alpha = 0.28f), forme)
             .semantics(mergeDescendants = true) { contentDescription = "Carte d'identité Droplet, identifiant $id" },
     ) {
         Box(
@@ -62,7 +64,17 @@ fun CarteIdentite(
                 Brush.verticalGradient(0f to LaitonCarte.copy(alpha = 0.10f), 0.45f to LaitonCarte.copy(alpha = 0f)),
             ),
         )
-        Guilloche(compteId.orEmpty(), LaitonCarte.copy(alpha = 0.16f), Modifier.fillMaxSize())
+        Guilloche(compteId.orEmpty(), LaitonCarte.copy(alpha = 0.30f), Modifier.fillMaxSize())
+        // Le reflet : une lumière en diagonale, comme sur une carte en métal.
+        Box(
+            Modifier.fillMaxSize().background(
+                Brush.linearGradient(
+                    0f to Color.White.copy(alpha = 0.10f),
+                    0.35f to Color.White.copy(alpha = 0.02f),
+                    0.6f to Color.White.copy(alpha = 0f),
+                ),
+            ),
+        )
         Box(Modifier.width(4.dp).fillMaxHeight().background(LaitonCarte))
         Column(
             Modifier.fillMaxSize().padding(start = 22.dp, end = 20.dp, top = 18.dp, bottom = 18.dp),
@@ -89,7 +101,7 @@ fun CarteIdentite(
                 )
                 Text(
                     id,
-                    style = TextStyle(fontFamily = MonoIdentifiants, fontSize = 22.sp, fontWeight = FontWeight.Medium, letterSpacing = 1.5.sp),
+                    style = TextStyle(fontFamily = MonoIdentifiants, fontSize = 25.sp, fontWeight = FontWeight.Medium, letterSpacing = 2.sp),
                     color = Color(0xFFF2F1EE),
                 )
             }

@@ -1,6 +1,7 @@
 // ============================================================================
 // LA RACINE — thème, verre, et ce qu'on montre :
-//   présentation (une seule fois) → bienvenue (activer) → les cinq onglets.
+//   présentation (une seule fois) → bienvenue (activer) → la page du compte,
+//   d'où s'ouvrent les autres écrans (pas d'onglets).
 // Une demande de connexion (scannée ou reçue par lien) passe par-dessus tout.
 // ============================================================================
 package app.dropletmesh.id.ui
@@ -50,19 +51,16 @@ import app.dropletmesh.id.UiApp
 import app.dropletmesh.id.donnees.Apparence
 import app.dropletmesh.id.donnees.LienDemande
 import app.dropletmesh.id.designsystem.Droplet
-import app.dropletmesh.id.designsystem.FondAurore
-import app.dropletmesh.id.designsystem.Onglets
-import app.dropletmesh.id.designsystem.SansTexte
+import app.dropletmesh.id.designsystem.TexteDroplet
 import app.dropletmesh.id.designsystem.ThemeDroplet
 import io.github.neoruaa.glasmio.glass.GlasmioBackdropHost
-import io.github.neoruaa.glasmio.ui.GlasmioNavigationBar
-import io.github.neoruaa.glasmio.ui.GlasmioTabItem
 import kotlinx.coroutines.delay
-
-enum class Onglet(val titre: String) { Accueil("Accueil"), Identite("Identité"), Acces("Accès"), Securite("Sécurité"), Compte("Compte") }
 
 /** Les écrans poussés au-dessus d'un onglet (niveau 2 ou 3). */
 sealed interface Ecran {
+    data object Identite : Ecran
+    data object Securite : Ecran
+    data object Acces : Ecran
     data object Scanner : Ecran
     data class Connexion(val clientId: String) : Ecran
     data object Apparence : Ecran
@@ -74,7 +72,6 @@ sealed interface Ecran {
 class Navigation(
     val ouvrir: (Ecran) -> Unit,
     val retour: () -> Unit,
-    val onglet: (Onglet) -> Unit,
 )
 
 @Composable
@@ -96,7 +93,7 @@ fun Racine(etat: EtatApp, lienEntrant: LienDemande?, lienTraite: () -> Unit, rev
     ThemeDroplet(sombre = sombre, reduireTransparence = ui.reduireTransparence) {
         GlasmioBackdropHost(
             modifier = Modifier.fillMaxSize(),
-            sampledContent = { FondAurore(Modifier.fillMaxSize()) },
+            sampledContent = { Box(Modifier.fillMaxSize().background(Droplet.couleurs.fond)) },
         ) {
             AnimatedContent(
                 targetState = when {
@@ -139,76 +136,54 @@ fun Racine(etat: EtatApp, lienEntrant: LienDemande?, lienTraite: () -> Unit, rev
 
 @Composable
 private fun Principal(ui: UiApp, etat: EtatApp) {
-    var onglet by rememberSaveable { mutableStateOf(Onglet.Accueil) }
     val pile = remember { mutableStateListOf<Ecran>() }
     val nav = remember {
         Navigation(
             ouvrir = { pile.add(it) },
             retour = { if (pile.isNotEmpty()) pile.removeAt(pile.lastIndex) },
-            onglet = { pile.clear(); onglet = it },
         )
     }
     BackHandler(enabled = pile.isNotEmpty()) { nav.retour() }
-    BackHandler(enabled = pile.isEmpty() && onglet != Onglet.Accueil) { onglet = Onglet.Accueil }
 
-    Box(Modifier.fillMaxSize()) {
-        AnimatedContent(
-            targetState = onglet,
-            transitionSpec = { fadeIn(tween(180)) togetherWith fadeOut(tween(120)) },
-            label = "onglet",
-        ) { o ->
-            when (o) {
-                Onglet.Accueil -> Accueil(ui, nav, onRafraichir = etat::chargerConnexions)
-                Onglet.Identite -> Identite(ui)
-                Onglet.Acces -> Acces(ui, nav, onRafraichir = etat::chargerConnexions)
-                Onglet.Securite -> Securite(ui, nav, onOublier = etat::oublierCeTelephone)
-                Onglet.Compte -> Compte(ui, nav)
-            }
-        }
-        val compact = remember { mutableFloatStateOf(0f) }
-        GlasmioNavigationBar(
-            items = listOf(
-                GlasmioTabItem(Onglet.Accueil, Onglet.Accueil.titre, Onglets.accueil),
-                GlasmioTabItem(Onglet.Identite, Onglet.Identite.titre, Onglets.identite),
-                GlasmioTabItem(Onglet.Acces, Onglet.Acces.titre, Onglets.acces),
-                GlasmioTabItem(Onglet.Securite, Onglet.Securite.titre, Onglets.securite),
-                GlasmioTabItem(Onglet.Compte, Onglet.Compte.titre, Onglets.compte),
-            ),
-            selectedKey = onglet,
-            onSelected = { pile.clear(); onglet = it },
-            onExpand = {},
-            compactProgress = compact,
-            compactSize = 48.dp,
-            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp),
-        )
+    Box(Modifier.fillMaxSize().background(Droplet.couleurs.fond)) {
+        Accueil(ui, nav, onOublier = etat::oublierCeTelephone)
 
-        // Les écrans poussés glissent depuis la droite, par-dessus l'onglet.
+        // Les écrans poussés glissent depuis la droite (300 ms, décélération).
         val dessus = pile.lastOrNull()
         AnimatedContent(
             targetState = dessus,
             transitionSpec = {
-                if (targetState != null && (initialState == null || pile.size > 0)) {
-                    slideInHorizontally(tween(320)) { it } togetherWith fadeOut(tween(200))
+                val entre = targetState != null && pile.size > 0 && (initialState == null || pile.indexOf(initialState) < pile.lastIndex)
+                if (entre) {
+                    slideInHorizontally(tween(300, easing = Decelere)) { it } togetherWith slideOutHorizontally(tween(300, easing = Decelere)) { -it / 4 }
                 } else {
-                    fadeIn(tween(120)) togetherWith slideOutHorizontally(tween(280)) { it }
+                    slideInHorizontally(tween(300, easing = Decelere)) { -it / 4 } togetherWith slideOutHorizontally(tween(300, easing = Decelere)) { it }
                 }
             },
             label = "pile",
         ) { e ->
-            when (e) {
-                null -> Box(Modifier)
-                Ecran.Scanner -> Scanner(
-                    onLien = { lien -> nav.retour(); etat.ouvrirDemande(lien, depuisLien = false) },
-                    onFermer = nav.retour,
-                )
-                is Ecran.Connexion -> DetailConnexion(ui, e.clientId, nav, onRetirer = { c -> etat.retirer(c); nav.retour() })
-                Ecran.Apparence -> ReglageApparence(ui, nav, etat::changerApparence, etat::changerTransparence)
-                Ecran.Confidentialite -> Confidentialite(nav)
-                Ecran.APropos -> APropos(nav)
+            if (e == null) return@AnimatedContent
+            Box(Modifier.fillMaxSize().background(Droplet.couleurs.fond)) {
+                when (e) {
+                    Ecran.Identite -> Identite(ui, nav)
+                    Ecran.Securite -> Securite(ui, nav, onOublier = { pile.clear(); etat.oublierCeTelephone() })
+                    Ecran.Acces -> Acces(ui, nav, onRafraichir = etat::chargerConnexions)
+                    Ecran.Scanner -> Scanner(
+                        onLien = { lien -> nav.retour(); etat.ouvrirDemande(lien, depuisLien = false) },
+                        onFermer = nav.retour,
+                    )
+                    is Ecran.Connexion -> DetailConnexion(ui, e.clientId, nav, onRetirer = { c -> etat.retirer(c); nav.retour() })
+                    Ecran.Apparence -> ReglageApparence(ui, nav, etat::changerApparence, etat::changerTransparence)
+                    Ecran.Confidentialite -> Confidentialite(nav)
+                    Ecran.APropos -> APropos(nav)
+                }
             }
         }
     }
 }
+
+/** La courbe de Droplet Design : décélère, ne dépasse jamais. */
+private val Decelere = androidx.compose.animation.core.CubicBezierEasing(0.25f, 0.1f, 0.25f, 1f)
 
 /** Un message bref en haut de l'écran (une action a réussi), qui s'efface seul. */
 @Composable
@@ -236,7 +211,7 @@ private fun Message(texte: String?, vu: () -> Unit, modifier: Modifier) {
                 .clip(forme)
                 .background(c.surfaceElevee)
                 .padding(horizontal = 18.dp, vertical = 12.dp),
-            style = TextStyle(fontFamily = SansTexte, fontSize = 15.sp, fontWeight = FontWeight.Medium),
+            style = TextStyle(fontFamily = TexteDroplet, fontSize = 15.sp, fontWeight = FontWeight.Medium),
             color = c.texte,
         )
     }

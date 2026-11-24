@@ -24,19 +24,16 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 
-/** La place de la barre d'onglets flottante (62 dp + marges). */
-private val PlaceBarre: Dp = 96.dp
-
 @Composable
 fun Page(
     titre: String,
     sousTitre: String? = null,
     retour: (() -> Unit)? = null,
-    avecBarre: Boolean = true,
+    avecBarre: Boolean = false,
     actions: @Composable RowScope.() -> Unit = {},
     contenu: LazyListScope.() -> Unit,
 ) {
-    val bas = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + if (avecBarre) PlaceBarre else 24.dp
+    val bas = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + if (avecBarre) 96.dp else 32.dp
     GlasmioPinnedListPage(
         title = titre,
         subtitle = sousTitre,
@@ -49,7 +46,7 @@ fun Page(
     )
 }
 
-/** Un groupe : titre (serif), îlot de lignes, explication dessous. */
+/** Un groupe : en-tête discret, îlot de lignes, explication dessous. */
 fun LazyListScope.groupe(
     cle: String,
     titre: String? = null,

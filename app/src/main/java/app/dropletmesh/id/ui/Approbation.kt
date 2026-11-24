@@ -71,12 +71,11 @@ import app.dropletmesh.id.designsystem.BoutonPrincipal
 import app.dropletmesh.id.designsystem.BoutonTexte
 import app.dropletmesh.id.designsystem.Corps
 import app.dropletmesh.id.designsystem.Droplet
-import app.dropletmesh.id.designsystem.FondAurore
 import app.dropletmesh.id.designsystem.Icone
-import app.dropletmesh.id.designsystem.MonoIdentifiants
-import app.dropletmesh.id.designsystem.SansTexte
+import app.dropletmesh.id.designsystem.ChiffresDroplet
+import app.dropletmesh.id.designsystem.TexteDroplet
 import app.dropletmesh.id.designsystem.Sceau
-import app.dropletmesh.id.designsystem.SerifTitres
+import app.dropletmesh.id.designsystem.TitresDroplet
 import io.github.neoruaa.glasmio.icons.GlasmioIcon
 import io.github.neoruaa.glasmio.ui.GlasmioGroupedList
 import io.github.neoruaa.glasmio.ui.GlasmioIconButton
@@ -95,8 +94,8 @@ fun Approbation(
 ) {
     val c = Droplet.couleurs
     Box(Modifier.fillMaxSize()) {
-        FondAurore(Modifier.fillMaxSize())
-        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to c.laiton.copy(alpha = if (c.sombre) 0.10f else 0.06f), 0.32f to c.laiton.copy(alpha = 0f))))
+        Box(Modifier.fillMaxSize().background(Droplet.couleurs.fond))
+        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to c.goutte.copy(alpha = if (c.sombre) 0.10f else 0.06f), 0.32f to c.goutte.copy(alpha = 0f))))
         AnimatedContent(
             targetState = when {
                 etat.resultat != null -> 2
@@ -138,8 +137,8 @@ private fun Formulaire(
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
                 if (etat.lien.emetteur == Liens.TEST) "DROPLET ID · TEST" else "DROPLET ID",
-                style = TextStyle(fontFamily = SansTexte, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.4.sp),
-                color = c.laiton,
+                style = TextStyle(fontFamily = TexteDroplet, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.4.sp),
+                color = c.goutte,
                 modifier = Modifier.padding(start = 4.dp),
             )
             Spacer(Modifier.weight(1f))
@@ -153,16 +152,16 @@ private fun Formulaire(
                 Initiale(d.nomApp, taille = 56)
                 Spacer(Modifier.width(14.dp))
                 Column {
-                    Text(d.nomApp, style = TextStyle(fontFamily = SansTexte, fontSize = 17.sp, fontWeight = FontWeight.SemiBold), color = c.texte)
+                    Text(d.nomApp, style = TextStyle(fontFamily = TexteDroplet, fontSize = 17.sp, fontWeight = FontWeight.SemiBold), color = c.texte)
                     if (d.site.isNotEmpty()) {
-                        Text(d.site, style = TextStyle(fontFamily = MonoIdentifiants, fontSize = 13.sp), color = c.texteSecondaire)
+                        Text(d.site, style = TextStyle(fontFamily = ChiffresDroplet, fontSize = 13.sp), color = c.texteSecondaire)
                     }
                 }
             }
             Text(
                 "Se connecter à ${d.nomApp} ?",
                 Modifier.semantics { heading() },
-                style = TextStyle(fontFamily = SerifTitres, fontSize = 30.sp, lineHeight = 36.sp, fontWeight = FontWeight.SemiBold),
+                style = TextStyle(fontFamily = TitresDroplet, fontSize = 30.sp, lineHeight = 36.sp, fontWeight = FontWeight.SemiBold),
                 color = c.texte,
             )
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -173,7 +172,7 @@ private fun Formulaire(
                 Text(
                     "${d.nomApp} recevra",
                     Modifier.padding(start = 4.dp, bottom = 6.dp),
-                    style = TextStyle(fontFamily = SansTexte, fontSize = 14.sp, fontWeight = FontWeight.Medium),
+                    style = TextStyle(fontFamily = TexteDroplet, fontSize = 14.sp, fontWeight = FontWeight.Medium),
                     color = c.texteSecondaire,
                 )
                 GlasmioGroupedList {
@@ -233,7 +232,7 @@ private fun ChampCode(valeur: String, onChange: (String) -> Unit, modifier: Modi
         modifier = modifier.fillMaxWidth().semantics { contentDescription = "Nombre à deux chiffres" },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-        textStyle = TextStyle(fontFamily = MonoIdentifiants, fontSize = 1.sp, color = c.fond),
+        textStyle = TextStyle(fontFamily = ChiffresDroplet, fontSize = 1.sp, color = c.fond),
         cursorBrush = SolidColor(c.fond),
         decorationBox = { interne ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally)) {
@@ -242,10 +241,10 @@ private fun ChampCode(valeur: String, onChange: (String) -> Unit, modifier: Modi
                     val actif = i == valeur.length.coerceAtMost(1)
                     Box(
                         Modifier.size(width = 84.dp, height = 100.dp).clip(RoundedCornerShape(18.dp)).background(c.surface)
-                            .border(if (actif) 2.dp else 1.dp, if (actif) c.laiton else c.bordure, RoundedCornerShape(18.dp)),
+                            .border(if (actif) 2.dp else 1.dp, if (actif) c.goutte else c.bordure, RoundedCornerShape(18.dp)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(chiffre, style = TextStyle(fontFamily = MonoIdentifiants, fontSize = 46.sp, fontWeight = FontWeight.Medium), color = c.texte)
+                        Text(chiffre, style = TextStyle(fontFamily = ChiffresDroplet, fontSize = 46.sp, fontWeight = FontWeight.Medium), color = c.texte)
                     }
                 }
                 Box(Modifier.size(1.dp)) { interne() }
@@ -260,7 +259,7 @@ private fun Avertissement(texte: String) {
     Row(verticalAlignment = Alignment.Top) {
         GlasmioIcon(Icone.ALERTE, contentDescription = "Attention", tint = c.erreur, size = 20.dp)
         Spacer(Modifier.width(8.dp))
-        Text(texte, style = TextStyle(fontFamily = SansTexte, fontSize = 15.sp, lineHeight = 21.sp), color = c.texte)
+        Text(texte, style = TextStyle(fontFamily = TexteDroplet, fontSize = 15.sp, lineHeight = 21.sp), color = c.texte)
     }
 }
 
@@ -297,7 +296,7 @@ private fun Fin(titre: String, texte: String, bouton: String, onFermer: () -> Un
         Spacer(Modifier.weight(1f))
         if (sceau) Sceau() else if (icone != null) GlasmioIcon(icone, contentDescription = null, tint = c.texteSecondaire, size = 64.dp)
         Spacer(Modifier.height(24.dp))
-        Text(titre, style = TextStyle(fontFamily = SerifTitres, fontSize = 28.sp, fontWeight = FontWeight.SemiBold), color = c.texte, textAlign = TextAlign.Center)
+        Text(titre, style = TextStyle(fontFamily = TitresDroplet, fontSize = 28.sp, fontWeight = FontWeight.SemiBold), color = c.texte, textAlign = TextAlign.Center)
         Spacer(Modifier.height(8.dp))
         Corps(texte, secondaire = true)
         Spacer(Modifier.weight(1.4f))

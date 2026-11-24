@@ -22,60 +22,6 @@ import io.github.neoruaa.glasmio.ui.GlasmioSwitch
 import java.util.Locale
 
 @Composable
-fun Compte(ui: UiApp, nav: Navigation) {
-    val contexte = LocalContext.current
-    Page(titre = "Compte") {
-        groupe("preferences", titre = "Préférences") {
-            GlasmioListRow(
-                title = "Apparence",
-                detail = ui.apparence.titre,
-                leading = { Pastille(Icone.VISIBILITE) },
-                onClick = { nav.ouvrir(Ecran.Apparence) },
-                showTopSeparator = false,
-            )
-            GlasmioListRow(
-                title = "Langue",
-                detail = Locale.getDefault().getDisplayLanguage(Locale.getDefault()).replaceFirstChar { it.titlecase() },
-                leading = { Pastille(Icone.LANGUE) },
-                onClick = {
-                    val intent = if (Build.VERSION.SDK_INT >= 33) {
-                        Intent(Settings.ACTION_APP_LOCALE_SETTINGS, Uri.fromParts("package", contexte.packageName, null))
-                    } else {
-                        Intent(Settings.ACTION_LOCALE_SETTINGS)
-                    }
-                    runCatching { contexte.startActivity(intent) }
-                },
-            )
-            GlasmioListRow(
-                title = "Notifications",
-                leading = { Pastille(Icone.NOTIFICATIONS) },
-                onClick = {
-                    runCatching {
-                        contexte.startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, contexte.packageName))
-                    }
-                },
-            )
-        }
-        groupe("confidentialite", titre = "Confidentialité") {
-            GlasmioListRow(
-                title = "Ce que Droplet ID conserve",
-                leading = { Pastille(Icone.CONFIDENTIALITE) },
-                onClick = { nav.ouvrir(Ecran.Confidentialite) },
-                showTopSeparator = false,
-            )
-        }
-        groupe("apropos", pied = "Droplet ID ${BuildConfig.VERSION_NAME}") {
-            GlasmioListRow(
-                title = "À propos et licences",
-                leading = { Pastille(Icone.COMPTE) },
-                onClick = { nav.ouvrir(Ecran.APropos) },
-                showTopSeparator = false,
-            )
-        }
-    }
-}
-
-@Composable
 fun ReglageApparence(ui: UiApp, nav: Navigation, onApparence: (Apparence) -> Unit, onTransparence: (Boolean) -> Unit) {
     Page(titre = "Apparence", retour = nav.retour, avecBarre = false) {
         item(key = "mode") {
@@ -98,7 +44,7 @@ fun ReglageApparence(ui: UiApp, nav: Navigation, onApparence: (Apparence) -> Uni
 @Composable
 fun Confidentialite(nav: Navigation) {
     Page(titre = "Confidentialité", retour = nav.retour, avecBarre = false) {
-        groupe("telephone", titre = "Sur ce téléphone", pied = "Chiffré, exclu des sauvegardes. « Oublier Droplet ID » (onglet Sécurité) efface tout.") {
+        groupe("telephone", titre = "Sur ce téléphone", pied = "Chiffré, exclu des sauvegardes. « Oublier ce téléphone » efface tout.") {
             GlasmioListRow(title = "La clé de l'appareil", subtitle = "Pour signer vos approbations", leading = { Pastille(Icone.PASSKEY) }, showTopSeparator = false)
             GlasmioListRow(title = "Vos identifiants de compte", subtitle = "Compte et appareil", leading = { Pastille(Icone.IDENTITE) })
             GlasmioListRow(title = "Vos préférences", subtitle = "Apparence, présentation déjà vue", leading = { Pastille(Icone.COMPTE) })
@@ -123,7 +69,7 @@ fun APropos(nav: Navigation) {
         }
         groupe("licences", titre = "Logiciels libres", pied = "Merci à leurs auteurs.") {
             GlasmioListRow(title = "Glasmio", subtitle = "Composants et verre · Apache 2.0", showTopSeparator = false)
-            GlasmioListRow(title = "Source Serif 4, Source Sans 3, Source Code Pro", subtitle = "Adobe · SIL Open Font License 1.1")
+            GlasmioListRow(title = "Inter, Inter Tight", subtitle = "Rasmus Andersson · SIL Open Font License 1.1")
             GlasmioListRow(title = "Tink", subtitle = "Chiffrement · Google · Apache 2.0")
             GlasmioListRow(title = "OkHttp", subtitle = "Réseau · Square · Apache 2.0")
             GlasmioListRow(title = "ZXing", subtitle = "Lecture des codes QR · Apache 2.0")

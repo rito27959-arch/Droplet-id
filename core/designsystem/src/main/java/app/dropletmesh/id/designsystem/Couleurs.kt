@@ -1,13 +1,13 @@
 // ============================================================================
-// ENCRE ET LAITON — la palette de Droplet ID (voir le dossier de conception,
-// section Direction artistique). Contrastes calculés selon WCAG 2.2.
+// LES COULEURS — celles de Droplet Design, la famille Droplet.
 //
-//   encre   : les actions (bouton principal, interrupteurs, onglet actif)
-//   laiton  : l'autorité (sceau « vérifié », carte d'identité, focus)
-//   rouge   : seulement les erreurs, alertes et actions irréversibles
+//   Les gris d'Apple pour tout l'écran (noir pur en sombre, pour l'OLED).
+//   Une seule couleur d'action : la goutte. Jamais brute sous du texte
+//   blanc : on peint la goutte remplie (4,55:1).
+//   Succès, attention, erreur portent un sens, jamais une décoration.
 //
-// Le laiton ne va JAMAIS sur un bouton ni dans un paragraphe : s'il est
-// partout, il ne certifie plus rien.
+// Les noms des champs restent ceux de l'app (encre = la couleur d'action),
+// les valeurs viennent de design/droplet-design.json (dépôt droplet-site).
 // ============================================================================
 package app.dropletmesh.id.designsystem
 
@@ -18,68 +18,65 @@ import androidx.compose.ui.graphics.Color
 @Immutable
 data class CouleursDroplet(
     val sombre: Boolean,
-    /** Fond d'écran : blanc cassé / noir profond. */
+    /** `fond-groupe` : le fond gris des écrans en listes groupées. */
     val fond: Color,
-    /** Cartes et listes. */
+    /** `surface` : les groupes de lignes. */
     val surface: Color,
-    /** Feuilles et dialogues. */
+    /** `surface-haute` : une surface sur une surface (pastille, champ). */
     val surfaceElevee: Color,
+    /** `texte` : 4,5:1 minimum partout. */
     val texte: Color,
-    /** 5,9:1 sur fond clair, 7,3:1 sur fond sombre. */
+    /** `texte-2` : sous-titres et valeurs. */
     val texteSecondaire: Color,
-    /** Décorative seulement (contraste < 3:1). */
+    /** `texte-3` : chevrons et traits seulement (3:1). */
     val bordure: Color,
-    /** Bouton principal. 16,3:1 / 16,5:1 avec [surEncre]. */
+    /** `goutte-remplie` : boutons pleins, interrupteurs, liens. */
     val encre: Color,
+    /** Le texte posé sur la goutte remplie. */
     val surEncre: Color,
-    /** Sceau, filet et guilloché de la carte, focus. 5,7:1 / 9,9:1. */
-    val laiton: Color,
-    val surLaiton: Color,
-    /** Une action a réussi (à ne pas confondre avec « vérifié », en laiton). */
+    /** `goutte` : le logo, la lueur, l'avatar. */
+    val goutte: Color,
     val succes: Color,
     val avertissement: Color,
-    /** Erreurs, actions destructives, pastille « action requise ». */
     val erreur: Color,
 )
 
-/** Le noir de la carte d'identité : identique dans les deux modes. */
-val NoirCarte = Color(0xFF0A0A0B)
+/** La goutte, couleur de Droplet. */
+val Goutte = Color(0xFFFF2D55)
 
-/** Le laiton sur la carte noire (9,9:1), quel que soit le mode. */
-val LaitonCarte = Color(0xFFD6B35F)
+/** La goutte assombrie juste assez pour porter du texte blanc (4,55:1). */
+val GoutteRemplie = Color(0xFFEC002D)
 
 val CouleursClaires = CouleursDroplet(
     sombre = false,
-    fond = Color(0xFFF6F5F2),
+    fond = Color(0xFFF2F2F7),
     surface = Color(0xFFFFFFFF),
-    surfaceElevee = Color(0xFFFFFFFF),
-    texte = Color(0xFF141416),
-    texteSecondaire = Color(0xFF5E5E66),
-    bordure = Color(0xFFD9D8D4),
-    encre = Color(0xFF17181C),
-    surEncre = Color(0xFFF6F5F2),
-    laiton = Color(0xFF7A5C14),
-    surLaiton = Color(0xFFFFFFFF),
-    succes = Color(0xFF1E7A46),
-    avertissement = Color(0xFF8A5A00),
-    erreur = Color(0xFFC8102E),
+    surfaceElevee = Color(0xFFF2F2F7),
+    texte = Color(0xFF1D1D1F),
+    texteSecondaire = Color(0xFF6E6E73),
+    bordure = Color(0xFFC4C4C7),
+    encre = GoutteRemplie,
+    surEncre = Color.White,
+    goutte = Goutte,
+    succes = Color(0xFF107A43),
+    avertissement = Color(0xFF9F5300),
+    erreur = Color(0xFFD12B21),
 )
 
 val CouleursSombres = CouleursDroplet(
     sombre = true,
-    fond = Color(0xFF0A0A0B),
-    surface = Color(0xFF161618),
-    surfaceElevee = Color(0xFF1F1F22),
-    texte = Color(0xFFF2F1EE),
-    texteSecondaire = Color(0xFF9C9CA3),
-    bordure = Color(0xFF2A2A2E),
-    encre = Color(0xFFECEAE4),
-    surEncre = Color(0xFF0A0A0B),
-    laiton = Color(0xFFD6B35F),
-    surLaiton = Color(0xFF0A0A0B),
-    succes = Color(0xFF4CC38A),
-    avertissement = Color(0xFFF0B429),
-    erreur = Color(0xFFFF4D5E),
+    fond = Color(0xFF000000),
+    surface = Color(0xFF1C1C1E),
+    surfaceElevee = Color(0xFF2C2C2E),
+    texte = Color(0xFFF5F5F7),
+    texteSecondaire = Color(0xFFA1A1A6),
+    bordure = Color(0xFF5A5A5E),
+    encre = GoutteRemplie,
+    surEncre = Color.White,
+    goutte = Color(0xFFFF375F),
+    succes = Color(0xFF30D158),
+    avertissement = Color(0xFFFF9F0A),
+    erreur = Color(0xFFFF453A),
 )
 
 val LocalCouleursDroplet = staticCompositionLocalOf { CouleursClaires }

@@ -40,7 +40,7 @@ fun Securite(ui: UiApp, nav: Navigation, onOublier: () -> Unit) {
         runCatching { contexte.startActivity(intent) }
             .onFailure { runCatching { contexte.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS)) } }
     }
-    Page(titre = "Sécurité", sousTitre = if (a.actions.isEmpty()) "Votre compte est protégé" else "Des actions sont recommandées") {
+    Page(titre = "Connexion et sécurité", retour = nav.retour, sousTitre = if (a.actions.isEmpty()) "Votre compte est protégé" else "Des actions sont recommandées") {
         if (a.actions.isNotEmpty()) {
             groupe("actions", titre = "Actions recommandées") {
                 a.actions.forEachIndexed { i, action ->
@@ -58,7 +58,7 @@ fun Securite(ui: UiApp, nav: Navigation, onOublier: () -> Unit) {
             GlasmioListRow(
                 title = "Clé de ce téléphone",
                 subtitle = "Ed25519, créée ici, jamais envoyée",
-                leading = { Pastille(Icone.PASSKEY, teinte = c.laiton) },
+                leading = { Pastille(Icone.PASSKEY, teinte = c.goutte) },
                 showTopSeparator = false,
             )
             GlasmioListRow(

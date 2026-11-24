@@ -41,15 +41,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import app.dropletmesh.id.UiApp
 import app.dropletmesh.id.designsystem.BoutonPrincipal
-import app.dropletmesh.id.designsystem.CarteIdentite
+import app.dropletmesh.id.designsystem.AvatarDroplet
 import app.dropletmesh.id.designsystem.Corps
 import app.dropletmesh.id.designsystem.Droplet
 import app.dropletmesh.id.designsystem.Icone
-import app.dropletmesh.id.designsystem.SansTexte
-import app.dropletmesh.id.designsystem.SerifTitres
+import app.dropletmesh.id.designsystem.TexteDroplet
+import app.dropletmesh.id.designsystem.TitresDroplet
 import io.github.neoruaa.glasmio.icons.GlasmioIcon
 import io.github.neoruaa.glasmio.ui.GlasmioButton
 import kotlinx.coroutines.launch
@@ -82,7 +83,7 @@ fun Presentation(onTerminer: () -> Unit) {
     Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.End) {
             GlasmioButton(onClick = onTerminer) {
-                Text("Passer", color = c.texte, style = TextStyle(fontFamily = SansTexte, fontSize = 16.sp, fontWeight = FontWeight.Medium))
+                Text("Passer", color = c.texte, style = TextStyle(fontFamily = TexteDroplet, fontSize = 16.sp, fontWeight = FontWeight.Medium))
             }
         }
         HorizontalPager(etat, Modifier.weight(1f).fillMaxWidth()) { i ->
@@ -93,33 +94,27 @@ fun Presentation(onTerminer: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 if (i == 0) {
-                    CarteIdentite(
-                        compteId = null,
-                        ligneBas = "Votre identité",
-                        ligneBasDroite = "Ce téléphone",
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                    )
+                    AvatarDroplet(taille = 120.dp)
                 } else {
                     Box(
-                        Modifier.size(120.dp).clip(RoundedCornerShape(32.dp)).background(c.surface)
-                            .border(1.dp, c.bordure, RoundedCornerShape(32.dp)),
+                        Modifier.size(120.dp).clip(RoundedCornerShape(28.dp)).background(c.surface),
                         contentAlignment = Alignment.Center,
                     ) {
-                        GlasmioIcon(p.icone, contentDescription = null, tint = if (i == 1) c.laiton else c.texte, size = 56.dp)
+                        GlasmioIcon(p.icone, contentDescription = null, tint = if (i == 1) c.goutte else c.texte, size = 56.dp)
                     }
                 }
                 Spacer(Modifier.height(36.dp))
                 Text(
                     p.titre,
                     Modifier.semantics { heading() },
-                    style = TextStyle(fontFamily = SerifTitres, fontSize = 28.sp, lineHeight = 34.sp, fontWeight = FontWeight.SemiBold),
+                    style = TextStyle(fontFamily = TitresDroplet, fontSize = 28.sp, lineHeight = 32.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.02).em),
                     color = c.texte,
                     textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(14.dp))
                 Text(
                     p.texte,
-                    style = TextStyle(fontFamily = SansTexte, fontSize = 17.sp, lineHeight = 25.sp),
+                    style = TextStyle(fontFamily = TexteDroplet, fontSize = 17.sp, lineHeight = 25.sp),
                     color = c.texteSecondaire,
                     textAlign = TextAlign.Center,
                 )
@@ -130,7 +125,7 @@ fun Presentation(onTerminer: () -> Unit) {
                 val largeur by animateDpAsState(if (etat.currentPage == i) 22.dp else 7.dp, tween(250), label = "point")
                 Box(
                     Modifier.padding(horizontal = 4.dp).height(7.dp).width(largeur).clip(CircleShape)
-                        .background(if (etat.currentPage == i) c.encre else c.bordure),
+                        .background(if (etat.currentPage == i) c.texte else c.bordure),
                 )
             }
         }
@@ -153,15 +148,15 @@ fun Bienvenue(ui: UiApp, onActiver: () -> Unit) {
         Text(
             "Votre identité Droplet",
             Modifier.semantics { heading() },
-            style = TextStyle(fontFamily = SerifTitres, fontSize = 34.sp, lineHeight = 40.sp, fontWeight = FontWeight.SemiBold),
+            style = TextStyle(fontFamily = TitresDroplet, fontSize = 34.sp, lineHeight = 37.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.022).em),
             color = c.texte,
         )
         Spacer(Modifier.height(12.dp))
         Corps("Elle tient dans ce téléphone : une clé que personne d'autre ne possède, pas même Droplet.", secondaire = true)
         Spacer(Modifier.height(32.dp))
         Spacer(Modifier.weight(0.6f))
-        // La carte, encore vierge : l'objet qu'on va créer.
-        CarteIdentite(compteId = null, ligneBas = "Pas encore activée", ligneBasDroite = ui.appareil.modele, verifiee = false)
+        // La goutte et sa lueur : la signature de la famille Droplet.
+        AvatarDroplet(Modifier.align(Alignment.CenterHorizontally), taille = 112.dp)
         Spacer(Modifier.height(28.dp))
         Garantie(Icone.PASSKEY, "Une clé créée ici, qui ne quitte jamais ce téléphone")
         Garantie(Icone.VISIBILITE, "Ni numéro, ni e-mail, ni nom")
@@ -172,7 +167,7 @@ fun Bienvenue(ui: UiApp, onActiver: () -> Unit) {
                 Row(Modifier.fillMaxWidth().padding(bottom = 14.dp), verticalAlignment = Alignment.Top) {
                     GlasmioIcon(Icone.ALERTE, contentDescription = "Erreur", tint = c.erreur, size = 20.dp)
                     Spacer(Modifier.width(8.dp))
-                    Text(e, style = TextStyle(fontFamily = SansTexte, fontSize = 15.sp, lineHeight = 21.sp), color = c.texte)
+                    Text(e, style = TextStyle(fontFamily = TexteDroplet, fontSize = 15.sp, lineHeight = 21.sp), color = c.texte)
                 }
             }
         }
@@ -189,8 +184,8 @@ fun Bienvenue(ui: UiApp, onActiver: () -> Unit) {
 private fun Garantie(icone: String, texte: String) {
     val c = Droplet.couleurs
     Row(Modifier.fillMaxWidth().padding(vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
-        GlasmioIcon(icone, contentDescription = null, tint = c.laiton, size = 22.dp)
+        GlasmioIcon(icone, contentDescription = null, tint = c.texteSecondaire, size = 22.dp)
         Spacer(Modifier.width(14.dp))
-        Text(texte, style = TextStyle(fontFamily = SansTexte, fontSize = 16.sp, lineHeight = 22.sp), color = c.texte)
+        Text(texte, style = TextStyle(fontFamily = TexteDroplet, fontSize = 16.sp, lineHeight = 22.sp), color = c.texte)
     }
 }

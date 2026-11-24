@@ -19,33 +19,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
 import app.dropletmesh.id.UiApp
-import app.dropletmesh.id.designsystem.CarteIdentite
 import app.dropletmesh.id.designsystem.Droplet
 import app.dropletmesh.id.designsystem.Icone
-import app.dropletmesh.id.designsystem.MonoIdentifiants
+import app.dropletmesh.id.designsystem.ChiffresDroplet
 import app.dropletmesh.id.designsystem.Pastille
-import app.dropletmesh.id.designsystem.idAffiche
 import io.github.neoruaa.glasmio.ui.GlasmioListRow
 
 @Composable
-fun Identite(ui: UiApp) {
+fun Identite(ui: UiApp, nav: Navigation) {
     val contexte = LocalContext.current
     val c = Droplet.couleurs
-    Page(titre = "Identité") {
-        item(key = "carte") {
-            CarteIdentite(
-                compteId = ui.compte.compteId,
-                ligneBas = ui.compte.creeLe?.let { "Créée le ${dateLongue(it)}" } ?: "Activée sur ce téléphone",
-                ligneBasDroite = ui.appareil.modele,
-                modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
-            )
-        }
+    Page(titre = "Informations personnelles", retour = nav.retour) {
         groupe("identifiants", titre = "Identifiants", pied = "Chaque app reçoit un autre identifiant, calculé pour elle seule : deux apps ne peuvent pas savoir qu'il s'agit de vous.") {
             GlasmioListRow(
                 title = "Identifiant Droplet",
                 leading = { Pastille(Icone.IDENTITE) },
                 trailing = {
-                    Text(idAffiche(ui.compte.compteId), style = TextStyle(fontFamily = MonoIdentifiants, fontSize = 15.sp), color = c.texteSecondaire)
+                    Text(idAffiche(ui.compte.compteId), style = TextStyle(fontFamily = ChiffresDroplet, fontSize = 15.sp), color = c.texteSecondaire)
                 },
                 onClick = { copier(contexte, "Identifiant Droplet", ui.compte.compteId.orEmpty()) },
                 showTopSeparator = false,

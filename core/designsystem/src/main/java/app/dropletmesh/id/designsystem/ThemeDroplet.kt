@@ -1,9 +1,9 @@
 // ============================================================================
 // LE THÈME — Glasmio pour les contrôles (verre, menus, feuilles, alertes,
-// listes, navigation), Encre et laiton pour l'identité.
+// listes, navigation), Droplet Design pour l'identité de la famille.
 //
 // On ne remplace pas le système de Glasmio : on lui passe nos couleurs
-// (accent = encre, destructif = rouge, fonds blanc cassé / noir profond) et
+// (accent = la goutte, destructif = rouge, gris système d'Apple) et
 // nos polices. Glasmio garde ses formes, son verre et ses mouvements.
 // ============================================================================
 package app.dropletmesh.id.designsystem
@@ -23,11 +23,10 @@ import io.github.neoruaa.glasmio.core.glasmioColorScheme
 import io.github.neoruaa.glasmio.core.glasmioTypography
 import io.github.neoruaa.glasmio.icons.GlasmioIconProvider
 
-// La typographie « document officiel » (validée sur les maquettes, option B) :
-//   Source Serif 4  — les titres, comme un passeport ;
-//   Source Sans 3   — tout le texte de lecture et les contrôles ;
-//   Source Code Pro — les identifiants, lus caractère par caractère.
-// Trois polices variables SIL OFL 1.1, embarquées : l'app marche hors ligne.
+// La typographie de la famille Droplet (Droplet Design) :
+//   Inter Tight — les titres, gras et serrés ;
+//   Inter       — le texte, les contrôles et les chiffres (à chasse fixe).
+// Polices variables SIL OFL 1.1, embarquées : l'app marche hors ligne.
 
 private fun variable(res: Int, poids: Int) = Font(
     res,
@@ -35,26 +34,25 @@ private fun variable(res: Int, poids: Int) = Font(
     variationSettings = FontVariation.Settings(FontVariation.weight(poids)),
 )
 
-/** Les titres (écran, section, carte d'identité). */
-val SerifTitres = FontFamily(
-    variable(R.font.source_serif_4, 500),
-    variable(R.font.source_serif_4, 600),
-    variable(R.font.source_serif_4, 700),
+/** Les titres. */
+val TitresDroplet = FontFamily(
+    variable(R.font.inter_tight, 600),
+    variable(R.font.inter_tight, 700),
 )
 
 /** Le texte et les contrôles. */
-val SansTexte = FontFamily(
-    variable(R.font.source_sans_3, 400),
-    variable(R.font.source_sans_3, 500),
-    variable(R.font.source_sans_3, 600),
-    variable(R.font.source_sans_3, 700),
+val TexteDroplet = FontFamily(
+    variable(R.font.inter, 400),
+    variable(R.font.inter, 500),
+    variable(R.font.inter, 600),
+    variable(R.font.inter, 700),
 )
 
-/** Les identifiants (ID Droplet, codes). */
-val MonoIdentifiants = FontFamily(
-    variable(R.font.source_code_pro, 500),
-    variable(R.font.source_code_pro, 600),
-)
+/** Les identifiants et les codes : Inter, chiffres à chasse fixe (voir [StyleChiffres]). */
+val ChiffresDroplet = TexteDroplet
+
+/** Les réglages OpenType des chiffres qui ne doivent pas trembler. */
+const val StyleChiffres = "tnum"
 
 @Composable
 fun ThemeDroplet(
@@ -70,16 +68,17 @@ fun ThemeDroplet(
         elevatedBackground = c.surface,
         destructive = c.erreur,
     )
-    // Le texte en Source Sans ; les grands titres (titre de page, titres 1
-    // et 2) en Source Serif : c'est là que se joue l'esprit « document ».
-    val base = glasmioTypography(SansTexte)
-    fun serif(t: androidx.compose.ui.text.TextStyle) = t.copy(fontFamily = SerifTitres, fontWeight = FontWeight.SemiBold)
+    // Le texte en Inter ; les grands titres en Inter Tight gras, serrés de
+    // −2,2 % comme dans toute la famille.
+    val base = glasmioTypography(TexteDroplet)
+    fun titre(t: androidx.compose.ui.text.TextStyle) =
+        t.copy(fontFamily = TitresDroplet, fontWeight = FontWeight.Bold, letterSpacing = androidx.compose.ui.unit.TextUnit(-0.022f, androidx.compose.ui.unit.TextUnitType.Em))
     val typographie = base.copy(
-        displayLarge = serif(base.displayLarge),
-        displayMedium = serif(base.displayMedium),
-        displaySmall = serif(base.displaySmall),
-        headlineLarge = serif(base.headlineLarge),
-        headlineMedium = serif(base.headlineMedium),
+        displayLarge = titre(base.displayLarge),
+        displayMedium = titre(base.displayMedium),
+        displaySmall = titre(base.displaySmall),
+        headlineLarge = titre(base.headlineLarge),
+        headlineMedium = titre(base.headlineMedium),
     )
     GlasmioIconProvider(resolver = IconesDroplet) {
         GlasmioTheme(

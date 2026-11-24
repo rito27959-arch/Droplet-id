@@ -151,21 +151,13 @@ object IconesDroplet : GlasmioIconResolver {
 }
 
 /**
- * La couleur de la tuile de chaque icône, comme les Réglages d'iOS : une
- * couleur vive par sujet, glyphe blanc. Le laiton reste réservé à ce qui
- * certifie (sceau, vérifié).
+ * La couleur de la tuile d'une icône (glyphe blanc). Droplet Design : une
+ * seule couleur d'action, le reste en neutres.
  */
 fun couleurTuile(icone: String): Color = when (icone) {
-    Icone.IDENTITE, Icone.VISIBILITE -> Color(0xFF5E5CE6)
-    Icone.CARTE -> Color(0xFF2C2C30)
-    Icone.QR, Icone.SCANNER, Icone.APPS, Icone.LANGUE, Icone.EMAIL, Icone.NAVIGATEUR, Icone.CONFIDENTIALITE -> Color(0xFF0A84FF)
-    Icone.VERIFIE, Icone.SCEAU -> Color(0xFFC29A3E)
-    Icone.BOUCLIER, Icone.SECURITE, Icone.OK, Icone.NUMERO -> Color(0xFF30B158)
-    Icone.PASSKEY -> Color(0xFFFF375F)
-    Icone.DOUBLE_FACTEUR -> Color(0xFFFF9F0A)
-    Icone.HISTORIQUE -> Color(0xFFAF52DE)
-    Icone.RECUPERATION, Icone.EXPORT -> Color(0xFF30B0C7)
-    Icone.NOTIFICATIONS, Icone.ALERTE, Icone.SUPPRIMER, Icone.DECONNEXION, Icone.BLOQUER -> Color(0xFFFF3B30)
-    Icone.NAISSANCE -> Color(0xFFFF9F0A)
-    else -> Color(0xFF8E8E93) // téléphone, mot de passe, compte, personne : gris
+    // Une seule couleur dans toute l'app : la goutte, pour ce qui touche aux
+    // apps et à la clé. Tout le reste en graphite.
+    Icone.APPS, Icone.PASSKEY, Icone.SCEAU, Icone.VERIFIE -> GoutteRemplie
+    Icone.ALERTE, Icone.SUPPRIMER, Icone.DECONNEXION, Icone.BLOQUER -> Color(0xFFD12B21)
+    else -> Color(0xFF8E8E93)
 }

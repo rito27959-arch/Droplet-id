@@ -53,8 +53,8 @@ import app.dropletmesh.id.donnees.LienDemande
 import app.dropletmesh.id.donnees.Liens
 import app.dropletmesh.id.designsystem.BoutonPrincipal
 import app.dropletmesh.id.designsystem.LaitonCarte
-import app.dropletmesh.id.designsystem.SansTexte
-import app.dropletmesh.id.designsystem.SerifTitres
+import app.dropletmesh.id.designsystem.TexteDroplet
+import app.dropletmesh.id.designsystem.TitresDroplet
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.DecodeHintType
@@ -117,7 +117,7 @@ fun Scanner(onLien: (LienDemande) -> Unit, onFermer: () -> Unit) {
                 refuse -> {
                     Text(
                         "Droplet ID a besoin de la caméra pour lire le code. L'image n'est ni enregistrée ni envoyée.",
-                        style = TextStyle(fontFamily = SansTexte, fontSize = 16.sp, lineHeight = 23.sp),
+                        style = TextStyle(fontFamily = TexteDroplet, fontSize = 16.sp, lineHeight = 23.sp),
                         color = Color.White,
                         textAlign = TextAlign.Center,
                     )
@@ -126,12 +126,12 @@ fun Scanner(onLien: (LienDemande) -> Unit, onFermer: () -> Unit) {
                 else -> {
                     Text(
                         "Scannez le code",
-                        style = TextStyle(fontFamily = SerifTitres, fontSize = 24.sp, fontWeight = FontWeight.SemiBold),
+                        style = TextStyle(fontFamily = TitresDroplet, fontSize = 24.sp, fontWeight = FontWeight.SemiBold),
                         color = Color.White,
                     )
                     Text(
                         avis ?: "Sur le site, choisissez « Continuer avec Droplet ID » et visez le code affiché.",
-                        style = TextStyle(fontFamily = SansTexte, fontSize = 15.sp, lineHeight = 21.sp),
+                        style = TextStyle(fontFamily = TexteDroplet, fontSize = 15.sp, lineHeight = 21.sp),
                         color = if (avis != null) Color(0xFFFF4D5E) else Color(0xFFC9C8C4),
                         textAlign = TextAlign.Center,
                     )

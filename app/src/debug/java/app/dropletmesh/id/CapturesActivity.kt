@@ -28,26 +28,21 @@ import app.dropletmesh.id.donnees.Demande
 import app.dropletmesh.id.donnees.EtatAppareil
 import app.dropletmesh.id.donnees.LienDemande
 import app.dropletmesh.id.donnees.Liens
-import app.dropletmesh.id.designsystem.FondAurore
-import app.dropletmesh.id.designsystem.Onglets
+import app.dropletmesh.id.designsystem.Droplet
 import app.dropletmesh.id.designsystem.ThemeDroplet
 import app.dropletmesh.id.ui.APropos
 import app.dropletmesh.id.ui.Acces
 import app.dropletmesh.id.ui.Accueil
 import app.dropletmesh.id.ui.Approbation
 import app.dropletmesh.id.ui.Bienvenue
-import app.dropletmesh.id.ui.Compte
 import app.dropletmesh.id.ui.Confidentialite
 import app.dropletmesh.id.ui.DetailConnexion
 import app.dropletmesh.id.ui.Identite
 import app.dropletmesh.id.ui.Navigation
-import app.dropletmesh.id.ui.Onglet
 import app.dropletmesh.id.ui.Presentation
 import app.dropletmesh.id.ui.ReglageApparence
 import app.dropletmesh.id.ui.Securite
 import io.github.neoruaa.glasmio.glass.GlasmioBackdropHost
-import io.github.neoruaa.glasmio.ui.GlasmioNavigationBar
-import io.github.neoruaa.glasmio.ui.GlasmioTabItem
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -59,8 +54,8 @@ class CapturesActivity : AppCompatActivity() {
         val sombre = intent.getBooleanExtra("sombre", false)
         setContent {
             ThemeDroplet(sombre = sombre) {
-                GlasmioBackdropHost(modifier = Modifier.fillMaxSize(), sampledContent = { FondAurore(Modifier.fillMaxSize()) }) {
-                    Box(Modifier.fillMaxSize()) { Ecran(ecran) }
+                GlasmioBackdropHost(modifier = Modifier.fillMaxSize(), sampledContent = { Box(Modifier.fillMaxSize().background(Droplet.couleurs.fond)) }) {
+                    Box(Modifier.fillMaxSize().background(Droplet.couleurs.fond)) { Ecran(ecran) }
                 }
             }
         }
@@ -93,45 +88,23 @@ private val demande = EtatDemande(
 
 @Composable
 private fun Ecran(nom: String) {
-    val nav = remember { Navigation(ouvrir = {}, retour = {}, onglet = {}) }
+    val nav = remember { Navigation(ouvrir = {}, retour = {}) }
     when (nom) {
         "presentation" -> Presentation(onTerminer = {})
         "bienvenue" -> Bienvenue(exemple.copy(compte = EtatCompte(false, null, null, null)), onActiver = {})
-        "accueil" -> AvecBarre(Onglet.Accueil) { Accueil(exemple, nav, {}) }
-        "accueil-action" -> AvecBarre(Onglet.Accueil) { Accueil(exemple.copy(appareil = exemple.appareil.copy(verrouEcran = false)), nav, {}) }
-        "identite" -> AvecBarre(Onglet.Identite) { Identite(exemple) }
-        "acces" -> AvecBarre(Onglet.Acces) { Acces(exemple, nav, {}) }
-        "acces-vide" -> AvecBarre(Onglet.Acces) { Acces(exemple.copy(connexions = Chargement.Pret(emptyList(), maintenant)), nav, {}) }
+        "accueil" -> Accueil(exemple, nav, {})
+        "accueil-action" -> Accueil(exemple.copy(appareil = exemple.appareil.copy(verrouEcran = false)), nav, {})
+        "identite" -> Identite(exemple, nav)
+        "acces" -> Acces(exemple, nav, {})
+        "acces-vide" -> Acces(exemple.copy(connexions = Chargement.Pret(emptyList(), maintenant)), nav, {})
         "detail" -> DetailConnexion(exemple, "kunfox", nav, {})
-        "securite" -> AvecBarre(Onglet.Securite) { Securite(exemple, nav, {}) }
-        "compte" -> AvecBarre(Onglet.Compte) { Compte(exemple, nav) }
+        "securite" -> Securite(exemple, nav, {})
+        "compte" -> Accueil(exemple, nav, {})
         "apparence" -> ReglageApparence(exemple, nav, {}, {})
         "confidentialite" -> Confidentialite(nav)
         "apropos" -> APropos(nav)
         "approbation" -> Approbation(demande, exemple.appareil, { _, _, _ -> }, {}, {})
         "approuvee" -> Approbation(demande.copy(resultat = EtatDemande.Resultat.Approuvee), exemple.appareil, { _, _, _ -> }, {}, {})
-        else -> AvecBarre(Onglet.Accueil) { Accueil(exemple, nav, {}) }
-    }
-}
-
-@Composable
-private fun AvecBarre(onglet: Onglet, contenu: @Composable () -> Unit) {
-    Box(Modifier.fillMaxSize()) {
-        contenu()
-        GlasmioNavigationBar(
-            items = listOf(
-                GlasmioTabItem(Onglet.Accueil, Onglet.Accueil.titre, Onglets.accueil),
-                GlasmioTabItem(Onglet.Identite, Onglet.Identite.titre, Onglets.identite),
-                GlasmioTabItem(Onglet.Acces, Onglet.Acces.titre, Onglets.acces),
-                GlasmioTabItem(Onglet.Securite, Onglet.Securite.titre, Onglets.securite),
-                GlasmioTabItem(Onglet.Compte, Onglet.Compte.titre, Onglets.compte),
-            ),
-            selectedKey = onglet,
-            onSelected = {},
-            onExpand = {},
-            compactProgress = remember { mutableFloatStateOf(0f) },
-            compactSize = 48.dp,
-            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp),
-        )
+        else -> Accueil(exemple, nav, {})
     }
 }

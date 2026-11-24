@@ -37,7 +37,7 @@ import app.dropletmesh.id.designsystem.Corps
 import app.dropletmesh.id.designsystem.Droplet
 import app.dropletmesh.id.designsystem.Icone
 import app.dropletmesh.id.designsystem.Pastille
-import app.dropletmesh.id.designsystem.SerifTitres
+import app.dropletmesh.id.designsystem.TitresDroplet
 import io.github.neoruaa.glasmio.icons.GlasmioIcon
 import io.github.neoruaa.glasmio.scaffold.GlasmioPullToRefreshBox
 import io.github.neoruaa.glasmio.ui.GlasmioAlertButtonRole
@@ -52,7 +52,8 @@ fun Acces(ui: UiApp, nav: Navigation, onRafraichir: () -> Unit) {
     val etat = ui.connexions
     GlasmioPullToRefreshBox(isRefreshing = false, onRefresh = onRafraichir) {
         Page(
-            titre = "Accès",
+            titre = "Apps connectées",
+            retour = nav.retour,
             sousTitre = (etat as? Chargement.Pret)?.let { "Mis à jour ${ilYA(it.aJour)}" },
             actions = {
                 GlasmioIconButton(onClick = { nav.ouvrir(Ecran.Scanner) }) {
@@ -76,7 +77,7 @@ fun Acces(ui: UiApp, nav: Navigation, onRafraichir: () -> Unit) {
                 is Chargement.Pret -> if (etat.valeur.isEmpty()) {
                     item(key = "vide") {
                         Column(Modifier.fillMaxWidth().padding(top = 24.dp, start = 4.dp, end = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("Aucune app connectée", style = TextStyle(fontFamily = SerifTitres, fontSize = 20.sp, fontWeight = FontWeight.SemiBold), color = c.texte)
+                            Text("Aucune app connectée", style = TextStyle(fontFamily = TitresDroplet, fontSize = 20.sp, fontWeight = FontWeight.SemiBold), color = c.texte)
                             Corps("Quand vous vous connectez à une app avec Droplet ID, elle apparaît ici. Vous pourrez lui retirer l'accès à tout moment.", secondaire = true)
                         }
                     }
@@ -106,13 +107,13 @@ fun Acces(ui: UiApp, nav: Navigation, onRafraichir: () -> Unit) {
 fun Initiale(nom: String, taille: Int = 32) {
     val c = Droplet.couleurs
     Box(
-        Modifier.size(taille.dp).clip(RoundedCornerShape((taille * 0.28f).dp)).background(if (c.sombre) androidx.compose.ui.graphics.Color(0xFF26262A) else androidx.compose.ui.graphics.Color(0xFFECEBE7)),
+        Modifier.size(taille.dp).clip(RoundedCornerShape((taille * 0.24f).dp)).background(c.surfaceElevee),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             nom.firstOrNull()?.uppercase() ?: "?",
-            style = TextStyle(fontFamily = SerifTitres, fontSize = (taille * 0.5f).sp, fontWeight = FontWeight.SemiBold),
-            color = c.texte,
+            style = TextStyle(fontFamily = TitresDroplet, fontSize = (taille * 0.46f).sp, fontWeight = FontWeight.Bold),
+            color = c.texteSecondaire,
         )
     }
 }

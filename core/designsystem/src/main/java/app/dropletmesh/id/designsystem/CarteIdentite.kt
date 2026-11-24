@@ -5,6 +5,19 @@
 // ============================================================================
 package app.dropletmesh.id.designsystem
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -49,8 +62,34 @@ fun CarteIdentite(
 ) {
     val forme = ContinuousRoundedRectangle(20.dp)
     val id = idAffiche(compteId)
+    // L'entrée : la carte se pose en ressort (une fois).
+    val entree = remember { Animatable(0f) }
+    LaunchedEffect(Unit) { entree.animateTo(1f, spring(dampingRatio = 0.72f, stiffness = 220f)) }
+    // Le reflet : une bande de lumière traverse la carte en 1,4 s, toutes les 7 s.
+    val balayage by rememberInfiniteTransition(label = "reflet").animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            keyframes {
+                durationMillis = 7000
+                0f at 0
+                0f at 2600
+                1f at 4000 using FastOutSlowInEasing
+                1f at 7000
+            },
+        ),
+        label = "balayage",
+    )
     Box(
         modifier
+            .graphicsLayer {
+                val e = entree.value
+                alpha = e.coerceIn(0f, 1f)
+                scaleX = 0.92f + 0.08f * e
+                scaleY = 0.92f + 0.08f * e
+                translationY = (1f - e) * 40.dp.toPx()
+                rotationX = (1f - e) * 12f
+            }
             .fillMaxWidth()
             .aspectRatio(1.586f)
             .shadow(12.dp, forme, ambientColor = Color.Black.copy(alpha = 0.10f), spotColor = Color.Black.copy(alpha = 0.10f))
@@ -74,6 +113,22 @@ fun CarteIdentite(
                     0.6f to Color.White.copy(alpha = 0f),
                 ),
             ),
+        )
+        // La bande de lumière du reflet.
+        Box(
+            Modifier.fillMaxSize().drawWithContent {
+                drawContent()
+                val x = -size.width * 0.6f + balayage * size.width * 2.2f
+                drawRect(
+                    Brush.linearGradient(
+                        0f to Color.White.copy(alpha = 0f),
+                        0.5f to Color.White.copy(alpha = 0.16f),
+                        1f to Color.White.copy(alpha = 0f),
+                        start = Offset(x, 0f),
+                        end = Offset(x + size.width * 0.35f, size.height),
+                    ),
+                )
+            },
         )
         Box(Modifier.width(4.dp).fillMaxHeight().background(LaitonCarte))
         Column(

@@ -8,7 +8,14 @@ package app.dropletmesh.id.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
+import com.kyant.capsule.ContinuousRoundedRectangle
+import io.github.neoruaa.glasmio.glass.GlassSurface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -66,25 +73,25 @@ fun Accueil(ui: UiApp, nav: Navigation, onRafraichir: () -> Unit) {
                 )
             }
         }
-        groupe("raccourcis", titre = "Raccourcis") {
-            GlasmioListRow(
-                title = "Se connecter avec un code",
-                subtitle = "Scannez le code d'un site « Continuer avec Droplet ID »",
-                leading = { Pastille(Icone.SCANNER) },
-                onClick = { nav.ouvrir(Ecran.Scanner) },
-                showTopSeparator = false,
-            )
-            GlasmioListRow(
-                title = "Applications connectées",
-                detail = (connexions as? Chargement.Pret)?.valeur?.size?.toString(),
-                leading = { Pastille(Icone.APPS) },
-                onClick = { nav.onglet(Onglet.Acces) },
-            )
-            GlasmioListRow(
-                title = "Ma carte d'identité",
-                leading = { Pastille(Icone.CARTE) },
-                onClick = { nav.onglet(Onglet.Identite) },
-            )
+        // Les raccourcis : quatre tuiles de verre (elles réfractent le fond aurore).
+        item(key = "tuiles") {
+            val apps = (connexions as? Chargement.Pret)?.valeur?.size
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 4.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Tuile(Icone.SCANNER, "Se connecter", "Scanner un code", Modifier.weight(1f)) { nav.ouvrir(Ecran.Scanner) }
+                    Tuile(Icone.APPS, "Mes apps", apps?.let { if (it == 1) "1 connectée" else "$it connectées" } ?: "—", Modifier.weight(1f)) { nav.onglet(Onglet.Acces) }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Tuile(Icone.CARTE, "Ma carte", "Identité Droplet", Modifier.weight(1f)) { nav.onglet(Onglet.Identite) }
+                    Tuile(
+                        Icone.BOUCLIER,
+                        "Sécurité",
+                        if (actions.isEmpty()) "Protégé" else "${actions.size} à faire",
+                        Modifier.weight(1f),
+                        teinte = if (actions.isEmpty()) null else c.erreur,
+                    ) { nav.onglet(Onglet.Securite) }
+                }
+            }
         }
         item(key = "derniere") {
             val texte = when (connexions) {
@@ -96,6 +103,26 @@ fun Accueil(ui: UiApp, nav: Navigation, onRafraichir: () -> Unit) {
             }
             Column(Modifier.padding(horizontal = 4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(texte, style = TextStyle(fontFamily = SansTexte, fontSize = 13.sp, lineHeight = 18.sp), color = c.texteSecondaire)
+            }
+        }
+    }
+}
+
+/** Une tuile de raccourci en verre : grande icône de couleur, titre, état. */
+@Composable
+private fun Tuile(icone: String, titre: String, sous: String, modifier: Modifier, teinte: androidx.compose.ui.graphics.Color? = null, onClick: () -> Unit) {
+    val c = Droplet.couleurs
+    GlassSurface(
+        modifier = modifier.height(116.dp),
+        shape = ContinuousRoundedRectangle(24.dp),
+        onClick = onClick,
+        contentAlignment = Alignment.TopStart,
+    ) {
+        Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.SpaceBetween) {
+            Pastille(icone, teinte = teinte, taille = 38.dp)
+            Column {
+                Text(titre, style = TextStyle(fontFamily = SansTexte, fontSize = 17.sp, fontWeight = FontWeight.SemiBold), color = c.texte)
+                Text(sous, style = TextStyle(fontFamily = SansTexte, fontSize = 14.sp), color = c.texteSecondaire, maxLines = 1)
             }
         }
     }

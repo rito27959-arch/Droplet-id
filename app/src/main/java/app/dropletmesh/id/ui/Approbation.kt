@@ -71,6 +71,7 @@ import app.dropletmesh.id.designsystem.BoutonPrincipal
 import app.dropletmesh.id.designsystem.BoutonTexte
 import app.dropletmesh.id.designsystem.Corps
 import app.dropletmesh.id.designsystem.Droplet
+import app.dropletmesh.id.designsystem.FondAurore
 import app.dropletmesh.id.designsystem.Icone
 import app.dropletmesh.id.designsystem.MonoIdentifiants
 import app.dropletmesh.id.designsystem.SansTexte
@@ -93,11 +94,9 @@ fun Approbation(
     onFermer: () -> Unit,
 ) {
     val c = Droplet.couleurs
-    Box(
-        Modifier.fillMaxSize().background(c.fond).background(
-            Brush.verticalGradient(0f to c.laiton.copy(alpha = if (c.sombre) 0.10f else 0.06f), 0.32f to c.laiton.copy(alpha = 0f)),
-        ),
-    ) {
+    Box(Modifier.fillMaxSize()) {
+        FondAurore(Modifier.fillMaxSize())
+        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to c.laiton.copy(alpha = if (c.sombre) 0.10f else 0.06f), 0.32f to c.laiton.copy(alpha = 0f))))
         AnimatedContent(
             targetState = when {
                 etat.resultat != null -> 2

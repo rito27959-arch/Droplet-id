@@ -44,7 +44,7 @@ fun Page(
         onNavigateBack = retour,
         navigateBackContentDescription = "Retour",
         actions = actions,
-        backgroundColor = Droplet.couleurs.fond,
+        backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
         content = contenu,
     )
 }

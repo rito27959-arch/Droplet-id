@@ -79,7 +79,7 @@ fun Presentation(onTerminer: () -> Unit) {
     val c = Droplet.couleurs
     val etat = rememberPagerState { pages.size }
     val portee = rememberCoroutineScope()
-    Column(Modifier.fillMaxSize().background(c.fond).statusBarsPadding().navigationBarsPadding()) {
+    Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.End) {
             GlasmioButton(onClick = onTerminer) {
                 Text("Passer", color = c.texte, style = TextStyle(fontFamily = SansTexte, fontSize = 16.sp, fontWeight = FontWeight.Medium))
@@ -147,7 +147,7 @@ fun Presentation(onTerminer: () -> Unit) {
 fun Bienvenue(ui: UiApp, onActiver: () -> Unit) {
     val c = Droplet.couleurs
     Column(
-        Modifier.fillMaxSize().background(c.fond).statusBarsPadding().navigationBarsPadding().padding(horizontal = 20.dp),
+        Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(horizontal = 20.dp),
     ) {
         Spacer(Modifier.height(40.dp))
         Text(

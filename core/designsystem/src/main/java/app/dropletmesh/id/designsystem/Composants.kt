@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,7 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.StrokeCap
@@ -78,15 +79,20 @@ fun BoutonTexte(texte: String, onClick: () -> Unit, modifier: Modifier = Modifie
     }
 }
 
-/** L'icône d'une ligne : trait monochrome dans un cercle neutre ; la couleur ne dit qu'un état. */
+/**
+ * L'icône d'une ligne : une tuile de couleur aux coins continus, glyphe blanc,
+ * comme les Réglages d'iOS. [teinte] remplace la couleur du sujet pour dire
+ * un état (rouge = action requise, vert = protégé).
+ */
 @Composable
-fun Pastille(icone: String, teinte: Color? = null, taille: Dp = 32.dp) {
-    val c = Droplet.couleurs
+fun Pastille(icone: String, teinte: Color? = null, taille: Dp = 30.dp) {
+    val fond = teinte ?: couleurTuile(icone)
     Box(
-        Modifier.size(taille).clip(CircleShape).background(if (c.sombre) Color(0xFF26262A) else Color(0xFFECEBE7)),
+        Modifier.size(taille).clip(com.kyant.capsule.ContinuousRoundedRectangle(taille * 0.27f))
+            .background(Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.22f).compositeOver(fond), fond))),
         contentAlignment = Alignment.Center,
     ) {
-        GlasmioIcon(icone, contentDescription = null, tint = teinte ?: c.texte, size = taille * 0.56f)
+        GlasmioIcon(icone, contentDescription = null, tint = Color.White, size = taille * 0.62f)
     }
 }
 

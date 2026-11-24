@@ -28,7 +28,7 @@ import app.dropletmesh.id.donnees.Demande
 import app.dropletmesh.id.donnees.EtatAppareil
 import app.dropletmesh.id.donnees.LienDemande
 import app.dropletmesh.id.donnees.Liens
-import app.dropletmesh.id.designsystem.Droplet
+import app.dropletmesh.id.designsystem.FondAurore
 import app.dropletmesh.id.designsystem.Onglets
 import app.dropletmesh.id.designsystem.ThemeDroplet
 import app.dropletmesh.id.ui.APropos
@@ -59,8 +59,8 @@ class CapturesActivity : AppCompatActivity() {
         val sombre = intent.getBooleanExtra("sombre", false)
         setContent {
             ThemeDroplet(sombre = sombre) {
-                GlasmioBackdropHost(sampledColor = Droplet.couleurs.fond, modifier = Modifier.fillMaxSize()) {
-                    Box(Modifier.fillMaxSize().background(Droplet.couleurs.fond)) { Ecran(ecran) }
+                GlasmioBackdropHost(modifier = Modifier.fillMaxSize(), sampledContent = { FondAurore(Modifier.fillMaxSize()) }) {
+                    Box(Modifier.fillMaxSize()) { Ecran(ecran) }
                 }
             }
         }

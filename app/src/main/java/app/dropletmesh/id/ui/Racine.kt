@@ -50,6 +50,7 @@ import app.dropletmesh.id.UiApp
 import app.dropletmesh.id.donnees.Apparence
 import app.dropletmesh.id.donnees.LienDemande
 import app.dropletmesh.id.designsystem.Droplet
+import app.dropletmesh.id.designsystem.FondAurore
 import app.dropletmesh.id.designsystem.Onglets
 import app.dropletmesh.id.designsystem.SansTexte
 import app.dropletmesh.id.designsystem.ThemeDroplet
@@ -93,7 +94,10 @@ fun Racine(etat: EtatApp, lienEntrant: LienDemande?, lienTraite: () -> Unit, rev
         }
     }
     ThemeDroplet(sombre = sombre, reduireTransparence = ui.reduireTransparence) {
-        GlasmioBackdropHost(sampledColor = Droplet.couleurs.fond, modifier = Modifier.fillMaxSize()) {
+        GlasmioBackdropHost(
+            modifier = Modifier.fillMaxSize(),
+            sampledContent = { FondAurore(Modifier.fillMaxSize()) },
+        ) {
             AnimatedContent(
                 targetState = when {
                     !ui.presentationVue -> 0
@@ -147,7 +151,7 @@ private fun Principal(ui: UiApp, etat: EtatApp) {
     BackHandler(enabled = pile.isNotEmpty()) { nav.retour() }
     BackHandler(enabled = pile.isEmpty() && onglet != Onglet.Accueil) { onglet = Onglet.Accueil }
 
-    Box(Modifier.fillMaxSize().background(Droplet.couleurs.fond)) {
+    Box(Modifier.fillMaxSize()) {
         AnimatedContent(
             targetState = onglet,
             transitionSpec = { fadeIn(tween(180)) togetherWith fadeOut(tween(120)) },

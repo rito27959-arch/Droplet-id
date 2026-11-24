@@ -59,142 +59,64 @@ import io.github.neoruaa.glasmio.ui.GlasmioIconButton
 import io.github.neoruaa.glasmio.ui.GlasmioListRow
 
 @Composable
-fun Accueil(ui: UiApp, nav: Navigation, onOublier: () -> Unit) {
+fun Accueil(ui: UiApp, nav: Navigation, onScanner: () -> Unit, onOnglet: (Onglet) -> Unit) {
     val c = Droplet.couleurs
     val contexte = LocalContext.current
     val actions = ui.appareil.actions
     val apps = (ui.connexions as? Chargement.Pret)?.valeur?.size
-    var oublier by remember { mutableStateOf(false) }
-    val haut = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val bas = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-
-    Box(Modifier.fillMaxSize()) {
-        LazyColumn(
-            Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = haut + 56.dp, bottom = bas + 32.dp),
-            verticalArrangement = Arrangement.spacedBy(32.dp),
-        ) {
-            // L'en-tête : qui je suis ici.
-            item(key = "entete") {
-                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    AvatarDroplet(taille = 92.dp)
-                    Spacer(Modifier.height(14.dp))
-                    Text(
-                        "Droplet ID",
-                        Modifier.semantics { heading() },
-                        style = TextStyle(fontFamily = TitresDroplet, fontSize = 26.sp, lineHeight = 30.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.02).em),
-                        color = c.texte,
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        idAffiche(ui.compte.compteId),
-                        Modifier.clickable(role = Role.Button, onClickLabel = "Copier l'identifiant") {
-                            copier(contexte, "Identifiant Droplet", ui.compte.compteId.orEmpty())
-                        },
-                        style = TextStyle(fontFamily = TexteDroplet, fontSize = 15.sp, lineHeight = 20.sp, fontFeatureSettings = StyleChiffres),
-                        color = c.texteSecondaire,
-                    )
-                }
-            }
-
-            // Le compte.
-            item(key = "compte") {
-                GlasmioGroupedList {
-                    GlasmioListRow(
-                        title = "Informations personnelles",
-                        onClick = { nav.ouvrir(Ecran.Identite) },
-                        showTopSeparator = false,
-                    )
-                    GlasmioListRow(
-                        title = "Connexion et sécurité",
-                        detail = when (actions.size) { 0 -> null; 1 -> "1 action"; else -> "${actions.size} actions" },
-                        onClick = { nav.ouvrir(Ecran.Securite) },
-                    )
-                    GlasmioListRow(
-                        title = "Confidentialité",
-                        onClick = { nav.ouvrir(Ecran.Confidentialite) },
-                    )
-                }
-            }
-
-            // Les apps.
-            item(key = "apps") {
-                GlasmioGroupedList {
-                    GlasmioListRow(
-                        title = "Apps connectées",
-                        detail = apps?.toString(),
-                        leading = { Pastille(Icone.APPS) },
-                        onClick = { nav.ouvrir(Ecran.Acces) },
-                        showTopSeparator = false,
-                    )
-                    GlasmioListRow(
-                        title = "Se connecter avec un code",
-                        leading = { Pastille(Icone.SCANNER) },
-                        onClick = { nav.ouvrir(Ecran.Scanner) },
-                    )
-                }
-            }
-
-            // Ce téléphone, comme la liste des appareils d'un compte.
-            item(key = "appareil") {
-                GlasmioGroupedList {
-                    GlasmioListRow(
-                        title = ui.appareil.modele,
-                        subtitle = "Ce téléphone",
-                        leading = { GlasmioIcon(Icone.TELEPHONE, contentDescription = null, tint = c.texteSecondaire, size = 30.dp) },
-                        onClick = { nav.ouvrir(Ecran.Securite) },
-                        showTopSeparator = false,
-                    )
-                }
-            }
-
-            // Les préférences de l'app.
-            item(key = "preferences") {
-                GlasmioGroupedList {
-                    GlasmioListRow(
-                        title = "Apparence",
-                        detail = ui.apparence.titre,
-                        onClick = { nav.ouvrir(Ecran.Apparence) },
-                        showTopSeparator = false,
-                    )
-                    GlasmioListRow(
-                        title = "À propos",
-                        onClick = { nav.ouvrir(Ecran.APropos) },
-                    )
-                }
-            }
-
-            // Seule, en bas, l'action qui efface.
-            item(key = "oublier") {
-                GlasmioGroupedList {
-                    Box(
-                        Modifier.fillMaxWidth().heightIn(min = 52.dp).clickable(role = Role.Button) { oublier = true },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text("Oublier ce téléphone", style = TextStyle(fontFamily = TexteDroplet, fontSize = 17.sp, letterSpacing = (-0.024).em), color = c.erreur)
-                    }
-                }
+    // Une page à grand titre qui se replie au défilement (Glasmio, façon iOS).
+    Page(
+        titre = "Droplet ID",
+        avecBarre = true,
+        actions = {
+            GlasmioIconButton(onClick = onScanner) { GlasmioIcon(Icone.SCANNER, contentDescription = "Scanner un code de connexion") }
+        },
+    ) {
+        // L'en-tête : le logo bouclé, l'identifiant.
+        item(key = "entete") {
+            Column(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                AvatarDroplet(taille = 96.dp)
+                Spacer(Modifier.height(14.dp))
+                Text(
+                    if (actions.isEmpty()) "Votre identité est bouclée." else "Votre identité demande votre attention.",
+                    Modifier.semantics { heading() },
+                    style = TextStyle(fontFamily = TitresDroplet, fontSize = 20.sp, lineHeight = 24.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.015).em),
+                    color = c.texte,
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    idAffiche(ui.compte.compteId),
+                    Modifier.clickable(role = Role.Button, onClickLabel = "Copier l'identifiant") {
+                        copier(contexte, "Identifiant Droplet", ui.compte.compteId.orEmpty())
+                    },
+                    style = TextStyle(fontFamily = TexteDroplet, fontSize = 15.sp, lineHeight = 20.sp, fontFeatureSettings = StyleChiffres),
+                    color = c.texteSecondaire,
+                )
             }
         }
-
-        // Le seul bouton de la barre : scanner un code de connexion.
-        Row(Modifier.fillMaxWidth().padding(top = haut + 4.dp, end = 12.dp), horizontalArrangement = Arrangement.End) {
-            GlasmioIconButton(onClick = { nav.ouvrir(Ecran.Scanner) }) {
-                GlasmioIcon(Icone.SCANNER, contentDescription = "Scanner un code de connexion")
-            }
+        groupe("compte") {
+            GlasmioListRow(title = "Informations personnelles", leading = { Pastille(Icone.PERSONNE) }, onClick = { nav.ouvrir(Ecran.Identite) }, showTopSeparator = false)
+            GlasmioListRow(
+                title = "Sécurité",
+                detail = when (actions.size) { 0 -> "Protégé"; 1 -> "1 action"; else -> "${actions.size} actions" },
+                leading = { Pastille(Icone.BOUCLIER) },
+                onClick = { onOnglet(Onglet.Securite) },
+            )
+        }
+        groupe("apps") {
+            GlasmioListRow(title = "Apps connectées", detail = apps?.toString(), leading = { Pastille(Icone.APPS) }, onClick = { onOnglet(Onglet.Apps) }, showTopSeparator = false)
+            GlasmioListRow(title = "Se connecter avec un code", leading = { Pastille(Icone.SCANNER) }, onClick = onScanner)
+        }
+        groupe("appareil", pied = "Votre clé est sur ce téléphone et nulle part ailleurs.") {
+            GlasmioListRow(
+                title = ui.appareil.modele,
+                subtitle = "Ce téléphone",
+                leading = { GlasmioIcon(Icone.TELEPHONE, contentDescription = null, tint = c.texteSecondaire, size = 30.dp) },
+                onClick = { onOnglet(Onglet.Securite) },
+                showTopSeparator = false,
+            )
         }
     }
-
-    GlasmioAlertDialog(
-        visible = oublier,
-        onDismissRequest = { oublier = false },
-        title = "Oublier ce téléphone ?",
-        message = "La clé de ce téléphone sera effacée et l'appareil retiré de votre compte. Les apps connectées ne vous reconnaîtront plus. Cette action est définitive.",
-        buttons = listOf(
-            GlasmioAlertButtonSpec("Annuler", { oublier = false }, role = GlasmioAlertButtonRole.Cancel),
-            GlasmioAlertButtonSpec("Oublier", { oublier = false; onOublier() }, role = GlasmioAlertButtonRole.Destructive),
-        ),
-    )
 }
 
 /** L'identifiant en groupes de quatre, lisible à voix haute. */

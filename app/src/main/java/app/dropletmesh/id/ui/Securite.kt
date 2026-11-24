@@ -27,7 +27,7 @@ import io.github.neoruaa.glasmio.ui.GlasmioAlertDialog
 import io.github.neoruaa.glasmio.ui.GlasmioListRow
 
 @Composable
-fun Securite(ui: UiApp, nav: Navigation, onOublier: () -> Unit) {
+fun Securite(ui: UiApp, nav: Navigation, onOublier: () -> Unit, enOnglet: Boolean = false) {
     val contexte = LocalContext.current
     val c = Droplet.couleurs
     val a = ui.appareil
@@ -40,7 +40,7 @@ fun Securite(ui: UiApp, nav: Navigation, onOublier: () -> Unit) {
         runCatching { contexte.startActivity(intent) }
             .onFailure { runCatching { contexte.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS)) } }
     }
-    Page(titre = "Connexion et sécurité", retour = nav.retour, sousTitre = if (a.actions.isEmpty()) "Votre compte est protégé" else "Des actions sont recommandées") {
+    Page(titre = if (enOnglet) "Sécurité" else "Connexion et sécurité", retour = if (enOnglet) null else nav.retour, avecBarre = enOnglet, sousTitre = if (a.actions.isEmpty()) "Votre compte est protégé" else "Des actions sont recommandées") {
         if (a.actions.isNotEmpty()) {
             groupe("actions", titre = "Actions recommandées") {
                 a.actions.forEachIndexed { i, action ->

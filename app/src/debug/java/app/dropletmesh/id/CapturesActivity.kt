@@ -7,6 +7,16 @@
 // ============================================================================
 package app.dropletmesh.id
 
+import io.github.neoruaa.glasmio.ui.GlasmioTabItem
+
+import io.github.neoruaa.glasmio.ui.GlasmioNavigationBar
+
+import app.dropletmesh.id.designsystem.Onglets
+
+import app.dropletmesh.id.ui.Reglages
+
+import app.dropletmesh.id.ui.Onglet
+
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -96,19 +106,40 @@ private fun Ecran(nom: String) {
         "ouverture-3" -> Ouverture(onFin = {}, figer = 3.0f)
         "presentation" -> Presentation(onTerminer = {})
         "bienvenue" -> Bienvenue(exemple.copy(compte = EtatCompte(false, null, null, null)), onActiver = {})
-        "accueil" -> Accueil(exemple, nav, {})
-        "accueil-action" -> Accueil(exemple.copy(appareil = exemple.appareil.copy(verrouEcran = false)), nav, {})
+        "accueil" -> AvecBarre(Onglet.Accueil) { Accueil(exemple, nav, {}, {}) }
+        "accueil-action" -> AvecBarre(Onglet.Accueil) { Accueil(exemple.copy(appareil = exemple.appareil.copy(verrouEcran = false)), nav, {}, {}) }
         "identite" -> Identite(exemple, nav)
-        "acces" -> Acces(exemple, nav, {})
-        "acces-vide" -> Acces(exemple.copy(connexions = Chargement.Pret(emptyList(), maintenant)), nav, {})
+        "acces" -> AvecBarre(Onglet.Apps) { Acces(exemple, nav, {}, enOnglet = true) }
+        "acces-vide" -> AvecBarre(Onglet.Apps) { Acces(exemple.copy(connexions = Chargement.Pret(emptyList(), maintenant)), nav, {}, enOnglet = true) }
         "detail" -> DetailConnexion(exemple, "kunfox", nav, {})
-        "securite" -> Securite(exemple, nav, {})
-        "compte" -> Accueil(exemple, nav, {})
+        "securite" -> AvecBarre(Onglet.Securite) { Securite(exemple, nav, {}, enOnglet = true) }
+        "compte" -> AvecBarre(Onglet.Reglages) { Reglages(exemple, nav) }
         "apparence" -> ReglageApparence(exemple, nav, {}, {})
         "confidentialite" -> Confidentialite(nav)
         "apropos" -> APropos(nav)
         "approbation" -> Approbation(demande, exemple.appareil, { _, _, _ -> }, {}, {})
         "approuvee" -> Approbation(demande.copy(resultat = EtatDemande.Resultat.Approuvee), exemple.appareil, { _, _, _ -> }, {}, {})
-        else -> Accueil(exemple, nav, {})
+        else -> AvecBarre(Onglet.Accueil) { Accueil(exemple, nav, {}, {}) }
+    }
+}
+
+@Composable
+private fun AvecBarre(onglet: Onglet, contenu: @Composable () -> Unit) {
+    Box(Modifier.fillMaxSize()) {
+        contenu()
+        GlasmioNavigationBar(
+            items = listOf(
+                GlasmioTabItem(Onglet.Accueil, Onglet.Accueil.titre, Onglets.accueil),
+                GlasmioTabItem(Onglet.Apps, Onglet.Apps.titre, Onglets.acces),
+                GlasmioTabItem(Onglet.Securite, Onglet.Securite.titre, Onglets.securite),
+                GlasmioTabItem(Onglet.Reglages, Onglet.Reglages.titre, Onglets.compte),
+            ),
+            selectedKey = onglet,
+            onSelected = {},
+            onExpand = {},
+            compactProgress = remember { mutableFloatStateOf(0f) },
+            compactSize = 48.dp,
+            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp),
+        )
     }
 }

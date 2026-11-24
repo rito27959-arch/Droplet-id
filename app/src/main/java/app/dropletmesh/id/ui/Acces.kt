@@ -47,13 +47,14 @@ import io.github.neoruaa.glasmio.ui.GlasmioIconButton
 import io.github.neoruaa.glasmio.ui.GlasmioListRow
 
 @Composable
-fun Acces(ui: UiApp, nav: Navigation, onRafraichir: () -> Unit) {
+fun Acces(ui: UiApp, nav: Navigation, onRafraichir: () -> Unit, enOnglet: Boolean = false) {
     val c = Droplet.couleurs
     val etat = ui.connexions
     GlasmioPullToRefreshBox(isRefreshing = false, onRefresh = onRafraichir) {
         Page(
             titre = "Apps connectées",
-            retour = nav.retour,
+            retour = if (enOnglet) null else nav.retour,
+            avecBarre = enOnglet,
             sousTitre = (etat as? Chargement.Pret)?.let { "Mis à jour ${ilYA(it.aJour)}" },
             actions = {
                 GlasmioIconButton(onClick = { nav.ouvrir(Ecran.Scanner) }) {

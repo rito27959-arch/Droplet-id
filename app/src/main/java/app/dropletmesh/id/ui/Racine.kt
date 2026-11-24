@@ -6,6 +6,12 @@
 // ============================================================================
 package app.dropletmesh.id.ui
 
+import io.github.neoruaa.glasmio.ui.GlasmioTabItem
+
+import io.github.neoruaa.glasmio.ui.GlasmioNavigationBar
+
+import app.dropletmesh.id.designsystem.Onglets
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -57,10 +63,10 @@ import io.github.neoruaa.glasmio.glass.GlasmioBackdropHost
 import kotlinx.coroutines.delay
 
 /** Les écrans poussés au-dessus d'un onglet (niveau 2 ou 3). */
+enum class Onglet(val titre: String) { Accueil("Accueil"), Apps("Apps"), Securite("Sécurité"), Reglages("Réglages") }
+
 sealed interface Ecran {
     data object Identite : Ecran
-    data object Securite : Ecran
-    data object Acces : Ecran
     data object Scanner : Ecran
     data class Connexion(val clientId: String) : Ecran
     data object Apparence : Ecran
@@ -140,6 +146,7 @@ fun Racine(etat: EtatApp, lienEntrant: LienDemande?, lienTraite: () -> Unit, rev
 
 @Composable
 private fun Principal(ui: UiApp, etat: EtatApp) {
+    var onglet by rememberSaveable { mutableStateOf(Onglet.Accueil) }
     val pile = remember { mutableStateListOf<Ecran>() }
     val nav = remember {
         Navigation(
@@ -148,20 +155,47 @@ private fun Principal(ui: UiApp, etat: EtatApp) {
         )
     }
     BackHandler(enabled = pile.isNotEmpty()) { nav.retour() }
+    BackHandler(enabled = pile.isEmpty() && onglet != Onglet.Accueil) { onglet = Onglet.Accueil }
 
-    Box(Modifier.fillMaxSize().background(Droplet.couleurs.fond)) {
-        Accueil(ui, nav, onOublier = etat::oublierCeTelephone)
+    Box(Modifier.fillMaxSize()) {
+        AnimatedContent(
+            targetState = onglet,
+            transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(160)) },
+            label = "onglet",
+        ) { o ->
+            when (o) {
+                Onglet.Accueil -> Accueil(ui, nav, onScanner = { nav.ouvrir(Ecran.Scanner) }, onOnglet = { onglet = it })
+                Onglet.Apps -> Acces(ui, nav, onRafraichir = etat::chargerConnexions, enOnglet = true)
+                Onglet.Securite -> Securite(ui, nav, onOublier = etat::oublierCeTelephone, enOnglet = true)
+                Onglet.Reglages -> Reglages(ui, nav)
+            }
+        }
+        // La barre d'onglets de verre de Glasmio, flottante.
+        GlasmioNavigationBar(
+            items = listOf(
+                GlasmioTabItem(Onglet.Accueil, Onglet.Accueil.titre, Onglets.accueil),
+                GlasmioTabItem(Onglet.Apps, Onglet.Apps.titre, Onglets.acces),
+                GlasmioTabItem(Onglet.Securite, Onglet.Securite.titre, Onglets.securite),
+                GlasmioTabItem(Onglet.Reglages, Onglet.Reglages.titre, Onglets.compte),
+            ),
+            selectedKey = onglet,
+            onSelected = { pile.clear(); onglet = it },
+            onExpand = {},
+            compactProgress = remember { mutableFloatStateOf(0f) },
+            compactSize = 48.dp,
+            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp),
+        )
 
-        // Les écrans poussés glissent depuis la droite (300 ms, décélération).
+        // Les écrans poussés glissent depuis la droite, par-dessus la barre.
         val dessus = pile.lastOrNull()
         AnimatedContent(
             targetState = dessus,
             transitionSpec = {
                 val entre = targetState != null && pile.size > 0 && (initialState == null || pile.indexOf(initialState) < pile.lastIndex)
                 if (entre) {
-                    slideInHorizontally(tween(300, easing = Decelere)) { it } togetherWith slideOutHorizontally(tween(300, easing = Decelere)) { -it / 4 }
+                    slideInHorizontally(tween(340, easing = Decelere)) { it } togetherWith slideOutHorizontally(tween(340, easing = Decelere)) { -it / 4 }
                 } else {
-                    slideInHorizontally(tween(300, easing = Decelere)) { -it / 4 } togetherWith slideOutHorizontally(tween(300, easing = Decelere)) { it }
+                    slideInHorizontally(tween(340, easing = Decelere)) { -it / 4 } togetherWith slideOutHorizontally(tween(340, easing = Decelere)) { it }
                 }
             },
             label = "pile",
@@ -170,8 +204,6 @@ private fun Principal(ui: UiApp, etat: EtatApp) {
             Box(Modifier.fillMaxSize().background(Droplet.couleurs.fond)) {
                 when (e) {
                     Ecran.Identite -> Identite(ui, nav)
-                    Ecran.Securite -> Securite(ui, nav, onOublier = { pile.clear(); etat.oublierCeTelephone() })
-                    Ecran.Acces -> Acces(ui, nav, onRafraichir = etat::chargerConnexions)
                     Ecran.Scanner -> Scanner(
                         onLien = { lien -> nav.retour(); etat.ouvrirDemande(lien, depuisLien = false) },
                         onFermer = nav.retour,

@@ -22,6 +22,42 @@ import io.github.neoruaa.glasmio.ui.GlasmioSwitch
 import java.util.Locale
 
 @Composable
+fun Reglages(ui: UiApp, nav: Navigation) {
+    val contexte = LocalContext.current
+    Page(titre = "Réglages", avecBarre = true) {
+        groupe("preferences") {
+            GlasmioListRow(title = "Apparence", detail = ui.apparence.titre, leading = { Pastille(Icone.VISIBILITE) }, onClick = { nav.ouvrir(Ecran.Apparence) }, showTopSeparator = false)
+            GlasmioListRow(
+                title = "Langue",
+                detail = Locale.getDefault().getDisplayLanguage(Locale.getDefault()).replaceFirstChar { it.titlecase() },
+                leading = { Pastille(Icone.LANGUE) },
+                onClick = {
+                    val intent = if (Build.VERSION.SDK_INT >= 33) Intent(Settings.ACTION_APP_LOCALE_SETTINGS, Uri.fromParts("package", contexte.packageName, null)) else Intent(Settings.ACTION_LOCALE_SETTINGS)
+                    runCatching { contexte.startActivity(intent) }
+                },
+            )
+            GlasmioListRow(
+                title = "Notifications",
+                leading = { Pastille(Icone.NOTIFICATIONS) },
+                onClick = { runCatching { contexte.startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, contexte.packageName)) } },
+            )
+        }
+        groupe("vie-privee") {
+            GlasmioListRow(title = "Confidentialité", leading = { Pastille(Icone.CONFIDENTIALITE) }, onClick = { nav.ouvrir(Ecran.Confidentialite) }, showTopSeparator = false)
+            GlasmioListRow(title = "À propos", leading = { Pastille(Icone.COMPTE) }, onClick = { nav.ouvrir(Ecran.APropos) })
+        }
+        groupe("site", pied = "Droplet ID ${BuildConfig.VERSION_NAME} · dropletid.dropletmesh.app") {
+            GlasmioListRow(
+                title = "Site de Droplet ID",
+                leading = { Pastille(Icone.NAVIGATEUR) },
+                onClick = { runCatching { contexte.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://dropletid.dropletmesh.app"))) } },
+                showTopSeparator = false,
+            )
+        }
+    }
+}
+
+@Composable
 fun ReglageApparence(ui: UiApp, nav: Navigation, onApparence: (Apparence) -> Unit, onTransparence: (Boolean) -> Unit) {
     Page(titre = "Apparence", retour = nav.retour, avecBarre = false) {
         item(key = "mode") {
@@ -44,7 +80,7 @@ fun ReglageApparence(ui: UiApp, nav: Navigation, onApparence: (Apparence) -> Uni
 @Composable
 fun Confidentialite(nav: Navigation) {
     Page(titre = "Confidentialité", retour = nav.retour, avecBarre = false) {
-        groupe("telephone", titre = "Sur ce téléphone", pied = "Chiffré, exclu des sauvegardes. « Oublier ce téléphone » efface tout.") {
+        groupe("telephone", titre = "Sur ce téléphone", pied = "Chiffré, exclu des sauvegardes. « Oublier ce téléphone » (onglet Sécurité) efface tout.") {
             GlasmioListRow(title = "La clé de l'appareil", subtitle = "Pour signer vos approbations", leading = { Pastille(Icone.PASSKEY) }, showTopSeparator = false)
             GlasmioListRow(title = "Vos identifiants de compte", subtitle = "Compte et appareil", leading = { Pastille(Icone.IDENTITE) })
             GlasmioListRow(title = "Vos préférences", subtitle = "Apparence, présentation déjà vue", leading = { Pastille(Icone.COMPTE) })

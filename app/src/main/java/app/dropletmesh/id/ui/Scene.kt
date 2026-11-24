@@ -15,6 +15,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.animateFloat
 import app.dropletmesh.id.designsystem.RougeBoucle
 import androidx.compose.ui.draw.drawWithContent
@@ -73,8 +74,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -238,252 +241,295 @@ fun Ouverture(onFin: () -> Unit, figer: Float? = null) {
 }
 
 // ----------------------------------------------------------------------------
-// LA PRÉSENTATION — le principe de l'onboarding de Telegram, réécrit pour
-// Droplet ID (aucun code repris) :
-//   - l'illustration est FIXE au-dessus des textes ; seuls les textes glissent ;
-//   - l'illustration suit le doigt en continu : ses 700 grains d'argent passent
-//     d'une forme à l'autre (cœur → empreinte → réseau), en s'envolant un peu
-//     et en tournant pendant le trajet, dans le sens du geste ;
-//   - quand la page se pose, une animation propre à la page se joue (la
-//     ceinture se boucle, un balayage lit l'empreinte, les apps apparaissent) ;
-//   - des traits de pagination qui s'étirent, un bouton en métal qui brille.
+// LA PRÉSENTATION — la mise en scène de l'accueil de Telegram (même structure,
+// même façon de bouger), avec les illustrations et le code de Droplet ID :
+//   - une illustration au centre, au-dessus du texte ; à chaque page, l'ancienne
+//     se rétracte en tournant, la nouvelle jaillit avec un léger rebond, et ses
+//     éléments satellites sortent un à un ;
+//   - pendant le glissement, l'illustration suit un peu le doigt ;
+//   - le titre et le texte glissent avec le doigt ;
+//   - des points dont l'indicateur s'étire de l'un à l'autre ;
+//   - un seul bouton, le même sur toutes les pages, avec un reflet qui passe.
 // ----------------------------------------------------------------------------
 
 private data class PagePresentation(val titre: String, val texte: String)
 
 private val pagesPresentation = listOf(
-    PagePresentation("Votre identité.\nBouclée.", "Une seule identité pour Droplet Messenger, Droplet Drop et Kunfox. Elle vit dans ce téléphone, et nulle part ailleurs."),
-    PagePresentation("Sans mot de passe.\nSans e-mail.", "Pour vous connecter, vous vérifiez un nombre et vous approuvez avec votre empreinte. Rien à retenir, rien à voler."),
-    PagePresentation("Un identifiant\npar app.", "Chaque app reçoit un identifiant qui ne vaut que pour elle. Vous retirez un accès quand vous voulez."),
+    PagePresentation("Droplet ID", "Une seule identité pour **Droplet Messenger**, **Droplet Drop** et **Kunfox**. Elle vit dans votre téléphone."),
+    PagePresentation("Un geste", "Pour vous connecter, vous approuvez avec votre **empreinte**. C'est tout."),
+    PagePresentation("Sans mot de passe", "Rien à retenir, **rien à voler**. Votre clé ne quitte jamais ce téléphone."),
+    PagePresentation("Toutes vos apps", "Chaque app reçoit un **identifiant à elle**. Deux apps ne peuvent pas savoir que c'est vous."),
+    PagePresentation("Privé", "Ni numéro, ni e-mail, ni nom. **Vous retirez un accès** quand vous voulez."),
 )
 
-/** Les trois formes, en coordonnées 512 × 512 : n points chacune (x, y entrelacés). */
-private fun formesPresentation(n: Int): List<FloatArray> {
-    val coeur = ArrayList<Pair<Float, Float>>()
-    val region = android.graphics.Region().apply { setPath(cheminCoeur().asAndroidPath(), android.graphics.Region(0, 0, 512, 512)) }
-    var y = 140f
-    while (y < 384f) { var x = 118f; while (x < 394f) { if (region.contains(x.toInt(), y.toInt())) coeur += x to y; x += 7f }; y += 7f }
-
-    // L'empreinte : des boucles concentriques, ouvertes vers le bas.
-    val empreinte = ArrayList<Pair<Float, Float>>()
-    for (i in 0 until 8) {
-        val r = 22f + i * 19f
-        val (debut, fin) = if (i < 2) 0f to 360f else (150f - i * 2f) to (390f + i * 2f)
-        val pas = 6.5f / r * (180f / PI.toFloat())
-        var a = debut
-        while (a <= fin) {
-            val rad = a * PI.toFloat() / 180f
-            empreinte += (256f + r * cos(rad)) to (262f + r * 1.22f * sin(rad))
-            a += pas
-        }
-    }
-
-    // Le réseau : un nœud central, trois nœuds, des fils.
-    val reseau = ArrayList<Pair<Float, Float>>()
-    fun anneau(cx: Float, cy: Float, r: Float) { var a = 0f; while (a < 360f) { val rad = a * PI.toFloat() / 180f; reseau += (cx + r * cos(rad)) to (cy + r * sin(rad)); a += 360f / (r * 0.9f) } }
-    fun fil(x1: Float, y1: Float, x2: Float, y2: Float) { val l = kotlin.math.hypot(x2 - x1, y2 - y1); var d = 0f; while (d < l) { reseau += (x1 + (x2 - x1) * d / l) to (y1 + (y2 - y1) * d / l); d += 8f } }
-    val noeuds = listOf(256f to 96f, 112f to 384f, 400f to 384f)
-    anneau(256f, 262f, 46f); anneau(256f, 262f, 30f)
-    for ((nx, ny) in noeuds) {
-        anneau(nx, ny, 36f)
-        val dx = nx - 256f; val dy = ny - 262f; val l = kotlin.math.hypot(dx, dy)
-        fil(256f + dx / l * 52f, 262f + dy / l * 52f, nx - dx / l * 42f, ny - dy / l * 42f)
-    }
-
-    val alea = Random(7)
-    return listOf(coeur, empreinte, reseau).map { points ->
-        val melange = points.shuffled(alea)
-        FloatArray(2 * n).also { out ->
-            for (k in 0 until n) {
-                val (px, py) = melange[k % melange.size]
-                val bruit = if (k >= melange.size) 2.5f else 0f
-                out[2 * k] = px + (alea.nextFloat() - 0.5f) * bruit
-                out[2 * k + 1] = py + (alea.nextFloat() - 0.5f) * bruit
-            }
-        }
+/** « **gras** » → texte enrichi (comme les mots en gras des pages de Telegram). */
+private fun enrichi(texte: String) = androidx.compose.ui.text.buildAnnotatedString {
+    var gras = false
+    texte.split("**").forEach { morceau ->
+        if (gras) withStyle(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.SemiBold, color = Color.White)) { append(morceau) } else append(morceau)
+        gras = !gras
     }
 }
-
-/** Les nœuds du réseau, là où se posent les icônes des apps (512 × 512). */
-private val noeudsApps = listOf(256f to 96f, 112f to 384f, 400f to 384f)
 
 @Composable
 fun Presentation(onTerminer: () -> Unit) {
     val etat = rememberPagerState { pagesPresentation.size }
-    val portee = rememberCoroutineScope()
     val reduit = animationsReduites()
     val retour = LocalHapticFeedback.current
-    val n = 700
-    val formes = remember { formesPresentation(n) }
-    val retards = remember { val r = Random(11); FloatArray(n) { r.nextFloat() } }
+    val cible = etat.targetPage
+    var precedente by remember { mutableStateOf(0) }
+    val sens = if (cible >= precedente) 1f else -1f
+    LaunchedEffect(cible) { if (cible != precedente && !reduit) retour.performHapticFeedback(HapticFeedbackType.SegmentTick); precedente = cible }
+    val glisse = etat.currentPageOffsetFraction
 
-    // La position continue du pager, comme le « scroll offset » qui pilote l'illustration.
-    val position = (etat.currentPage + etat.currentPageOffsetFraction).coerceIn(0f, (pagesPresentation.size - 1).toFloat())
-    val posee = etat.settledPage
-    val immobile = !etat.isScrollInProgress && abs(position - posee) < 0.01f
-
-    // L'horloge des animations au repos (respiration des grains, balayage).
-    var horloge by remember { mutableFloatStateOf(0f) }
-    LaunchedEffect(reduit) {
-        if (reduit) return@LaunchedEffect
-        val debut = withFrameNanos { it }
-        while (true) withFrameNanos { horloge = (it - debut) / 1e9f }
-    }
-
-    // Une petite impulsion quand une page se pose (vibration légère).
-    val impulsion = remember { Animatable(1f) }
-    LaunchedEffect(posee) {
-        if (reduit) return@LaunchedEffect
-        retour.performHapticFeedback(HapticFeedbackType.SegmentTick)
-        impulsion.snapTo(0f); impulsion.animateTo(1f, spring(dampingRatio = 0.55f, stiffness = 260f))
-    }
-
-    // Page 1 : la ceinture se boucle une fois la page posée.
-    val boucle = remember { Animatable(if (reduit) 1f else 0f) }
-    val eclat = remember { Animatable(0f) }
-    LaunchedEffect(posee) {
-        if (posee == 0 && !reduit) {
-            boucle.snapTo(0f); eclat.snapTo(0f)
-            kotlinx.coroutines.delay(420)
-            boucle.animateTo(1f, tween(620))
-            retour.performHapticFeedback(HapticFeedbackType.Confirm)
-            eclat.animateTo(1f, tween(650))
-        }
-    }
-    // Page 2 : le balayage qui lit l'empreinte ; page 3 : les apps se posent.
-    val lecture = remember { Animatable(0f) }
-    val apps = remember { Animatable(if (reduit) 1f else 0f) }
-    LaunchedEffect(posee) {
-        if (reduit) return@LaunchedEffect
-        if (posee == 1) { lecture.snapTo(0f); kotlinx.coroutines.delay(200); lecture.animateTo(1f, tween(1400, easing = LinearEasing)) }
-        if (posee == 2) { apps.snapTo(0f); kotlinx.coroutines.delay(150); apps.animateTo(1f, tween(900)) }
-    }
-
-    val logoVisible by animateFloatAsState(if (immobile && posee == 0 || reduit && posee == 0) 1f else 0f, tween(if (immobile) 450 else 160), label = "logo")
-    val appsVisibles = if (posee == 2 && immobile) apps.value else 0f
-
-    FondScene(lumiere = position / 2f) {
+    Box(Modifier.fillMaxSize().background(NoirScene)) {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalArrangement = Arrangement.End) {
-                Text(
-                    "Passer",
-                    Modifier.clip(RoundedCornerShape(999.dp)).clickable(role = Role.Button) { onTerminer() }.padding(horizontal = 16.dp, vertical = 14.dp),
-                    style = TextStyle(fontFamily = TexteDroplet, fontSize = 16.sp, fontWeight = FontWeight.Medium), color = ArgentScene2,
-                )
+            Spacer(Modifier.weight(0.9f))
+            // L'illustration : elle change quand la page cible change, et suit un peu le doigt.
+            Box(
+                Modifier.fillMaxWidth().height(240.dp).graphicsLayer {
+                    translationX = -glisse * 40.dp.toPx()
+                    val r = 1f - abs(glisse) * 0.12f; scaleX = r; scaleY = r
+                },
+                contentAlignment = Alignment.Center,
+            ) {
+                androidx.compose.animation.AnimatedContent(
+                    targetState = cible,
+                    transitionSpec = {
+                        if (reduit) {
+                            androidx.compose.animation.fadeIn(tween(1)) togetherWith androidx.compose.animation.fadeOut(tween(1))
+                        } else {
+                            (androidx.compose.animation.scaleIn(spring(dampingRatio = 0.55f, stiffness = 320f), initialScale = 0.35f) + androidx.compose.animation.fadeIn(tween(180))) togetherWith
+                                (androidx.compose.animation.scaleOut(tween(220), targetScale = 0.35f) + androidx.compose.animation.fadeOut(tween(200)))
+                        }
+                    },
+                    label = "illustration",
+                ) { page -> Illustration(page, sens, reduit) }
             }
-
-            // L'ILLUSTRATION, FIXE : seuls les grains bougent.
-            Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Box(Modifier.fillMaxWidth(0.8f).aspectRatio(1f).graphicsLayer {
-                    val i = impulsion.value; scaleX = 0.96f + 0.04f * i; scaleY = scaleX
-                }) {
-                    Canvas(Modifier.fillMaxSize()) {
-                        val k = size.minDimension / 512f
-                        val i0 = position.toInt().coerceAtMost(pagesPresentation.size - 2)
-                        val fr = position - i0
-                        val a = formes[i0]; val b = formes[i0 + 1]
-                        val sens = if (etat.currentPageOffsetFraction >= 0f) 1f else -1f
-                        val voile = 1f - logoVisible * 0.92f
-                        for (q in 0 until n) {
-                            val d = retards[q]
-                            val t = doux(plage(fr, d * 0.3f, d * 0.3f + 0.7f))
-                            val vol = sin(PI.toFloat() * t)
-                            var x = a[2 * q] + (b[2 * q] - a[2 * q]) * t - 256f
-                            var y = a[2 * q + 1] + (b[2 * q + 1] - a[2 * q + 1]) * t - 262f
-                            // L'envol : les grains s'écartent du centre au milieu du trajet…
-                            val ecart = 1f + vol * (0.35f + d * 0.5f)
-                            x *= ecart; y *= ecart
-                            // … et tournent autour de l'axe vertical, dans le sens du geste.
-                            val ang = vol * 1.1f * sens
-                            var z = (d - 0.5f) * 140f * vol
-                            val ca = cos(ang); val sa = sin(ang)
-                            val nx = x * ca + z * sa; z = -x * sa + z * ca; x = nx
-                            // La respiration au repos.
-                            if (!reduit) { x += sin(horloge * 1.3f + d * 40f) * 1.6f; y += cos(horloge * 1.1f + d * 30f) * 1.6f }
-                            val persp = 1f / (1f + (z / 512f).coerceIn(-0.6f, 2f))
-                            val px = (256f + x * persp) * k; val py = (262f + y * persp) * k
-                            // Le balayage de l'empreinte allume les grains qu'il traverse.
-                            val ligne = 120f + lecture.value * 300f
-                            val lu = if (posee == 1 && immobile && lecture.value in 0.001f..0.999f) borne(1f - abs(a[2 * q + 1] - ligne) / 26f) else 0f
-                            val alpha = borne(persp * (0.55f + 0.45f * (1f - vol)) * voile + lu * 0.6f)
-                            drawCircle(if (lu > 0.3f) Color.White else ArgentScene, (1.25f + 1.1f * persp + lu * 0.9f) * k * 2f, Offset(px, py), alpha)
-                        }
-                        if (posee == 1 && immobile && lecture.value in 0.001f..0.999f) {
-                            val yl = (120f + lecture.value * 300f) * k
-                            drawLine(
-                                Brush.horizontalGradient(listOf(Color.Transparent, RougeBoucle, Color.Transparent), 60f * k, 452f * k),
-                                Offset(60f * k, yl), Offset(452f * k, yl), strokeWidth = 2.dp.toPx(),
-                            )
-                        }
-                    }
-                    // Page 1 : le vrai logo se pose sur le cœur de grains, et se boucle.
-                    if (logoVisible > 0f) {
-                        Box(Modifier.fillMaxSize().graphicsLayer { alpha = logoVisible; scaleX = 0.92f + logoVisible * 0.08f; scaleY = scaleX }.clip(RoundedCornerShape(30))) {
-                            LogoCeinture(Modifier.fillMaxSize(), boucle = boucle.value, eclat = eclat.value)
-                        }
-                    }
-                    // Page 3 : les icônes des apps se posent sur les nœuds.
-                    if (appsVisibles > 0f) {
-                        val icones = listOf(R.drawable.app_messenger, R.drawable.app_drop, R.drawable.app_kunfox)
-                        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
-                            val unite = maxWidth / 512f
-                            noeudsApps.forEachIndexed { j, (nx, ny) ->
-                                val q = doux(plage(appsVisibles, j * 0.15f, 0.55f + j * 0.15f))
-                                Image(
-                                    painterResource(icones[j]), null,
-                                    Modifier.offset(unite * (nx - 30f), unite * (ny - 30f)).size(unite * 60f)
-                                        .graphicsLayer { alpha = q; scaleX = 0.6f + 0.4f * q; scaleY = scaleX }
-                                        .clip(RoundedCornerShape(percent = 26)),
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // LES TEXTES, SEULS À GLISSER.
-            HorizontalPager(etat, Modifier.fillMaxWidth().height(200.dp)) { i ->
-                val ecart = (etat.currentPage - i) + etat.currentPageOffsetFraction
-                val presence = borne(1f - abs(ecart) * 1.4f)
-                Column(Modifier.fillMaxSize().padding(horizontal = 28.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    val p = pagesPresentation[i]
+            Spacer(Modifier.height(36.dp))
+            // Le texte, qui glisse avec le doigt.
+            HorizontalPager(etat, Modifier.fillMaxWidth().height(150.dp)) { i ->
+                val p = pagesPresentation[i]
+                Column(Modifier.fillMaxSize().padding(horizontal = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         p.titre,
-                        Modifier.semantics { heading() }.graphicsLayer { alpha = presence },
-                        style = TextStyle(fontFamily = TitresDroplet, fontSize = 32.sp, lineHeight = 35.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.03).em, textAlign = TextAlign.Center),
+                        Modifier.semantics { heading() },
+                        style = TextStyle(fontFamily = TitresDroplet, fontSize = 28.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.025).em, textAlign = TextAlign.Center),
                         color = Color.White,
                     )
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        p.texte,
-                        Modifier.graphicsLayer { alpha = presence; translationX = ecart * 40f },
+                        enrichi(p.texte),
                         style = TextStyle(fontFamily = TexteDroplet, fontSize = 16.sp, lineHeight = 23.sp, textAlign = TextAlign.Center),
                         color = ArgentScene2,
                     )
                 }
             }
-            Indicateur(position, pagesPresentation.size)
-            val derniere = etat.currentPage == pagesPresentation.lastIndex
+            Points(etat.currentPage + glisse, pagesPresentation.size)
+            Spacer(Modifier.weight(1f))
             BoutonMetal(
-                if (derniere) "Commencer" else "Continuer",
-                onClick = { if (derniere) onTerminer() else portee.launch { etat.animateScrollToPage(etat.currentPage + 1, animationSpec = tween(520)) } },
-                modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp),
+                "Commencer",
+                onClick = onTerminer,
+                modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 20.dp),
                 brille = !reduit,
             )
         }
     }
 }
 
-/** Des traits qui s'allongent : la page courante s'étire, en métal. */
+/** Les points : l'indicateur s'étire vers la page suivante, puis s'y rétracte. */
 @Composable
-private fun Indicateur(position: Float, n: Int) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 22.dp), horizontalArrangement = Arrangement.Center) {
-        repeat(n) { i ->
-            val proche = borne(1f - abs(position - i))
-            Box(
-                Modifier.padding(horizontal = 4.dp).height(6.dp).width((6 + 22 * proche).dp).clip(CircleShape)
-                    .background(if (proche > 0.5f) Metal else Brush.verticalGradient(listOf(Color(0xFF3A3C41), Color(0xFF3A3C41)))),
-            )
+private fun Points(position: Float, n: Int) {
+    val pas = 14.dp; val d = 6.dp
+    Box(Modifier.fillMaxWidth().padding(top = 18.dp), contentAlignment = Alignment.Center) {
+        Canvas(Modifier.width(pas * (n - 1) + d).height(d)) {
+            val p = pas.toPx(); val r = d.toPx() / 2
+            repeat(n) { drawCircle(Color(0xFF3A3C41), r, Offset(r + it * p, r)) }
+            val i = position.toInt().coerceIn(0, n - 1); val f = (position - i).coerceIn(0f, 1f)
+            val debut = r + i * p + p * borne((f - 0.5f) * 2f)
+            val fin = r + i * p + p * borne(f * 2f)
+            drawLine(ArgentScene, Offset(debut, r), Offset(fin, r), strokeWidth = r * 2, cap = StrokeCap.Round)
+        }
+    }
+}
+
+// --- Les illustrations -------------------------------------------------------
+
+private val Encre = Color(0xFF0E0F12)
+
+/** L'entrée commune : l'illustration arrive en tournant dans le sens du geste. */
+@Composable
+private fun Entree(sens: Float, reduit: Boolean, contenu: @Composable BoxScope.(Float) -> Unit) {
+    val t = remember { Animatable(if (reduit) 1f else 0f) }
+    LaunchedEffect(Unit) { if (!reduit) t.animateTo(1f, tween(900, easing = LinearEasing)) }
+    Box(
+        Modifier.size(240.dp).graphicsLayer { rotationZ = (1f - doux(plage(t.value, 0f, 0.4f))) * 24f * sens },
+        contentAlignment = Alignment.Center,
+    ) { contenu(t.value) }
+}
+
+@Composable
+private fun Illustration(page: Int, sens: Float, reduit: Boolean) = Entree(sens, reduit) { t ->
+    when (page) {
+        0 -> IllustrationIdentite(t, reduit)
+        1 -> IllustrationGeste(t, reduit)
+        2 -> IllustrationSansMotDePasse(t)
+        3 -> IllustrationApps(t)
+        else -> IllustrationPrive(t)
+    }
+}
+
+/** Un satellite qui sort du centre vers sa place, avec un rebond (retard en fraction de t). */
+@Composable
+private fun BoxScope.Satellite(t: Float, retard: Float, angle: Float, rayon: Dp, taille: Dp, contenu: @Composable () -> Unit) {
+    val q = plage(t, retard, retard + 0.35f)
+    val rebond = if (q <= 0f) 0f else 1f + sin(q * PI.toFloat()) * 0.18f * (1f - q) - (1f - doux(q))
+    val rad = angle * PI.toFloat() / 180f
+    Box(
+        Modifier.align(Alignment.Center).size(taille).graphicsLayer {
+            val dist = rayon.toPx() * doux(q)
+            translationX = cos(rad) * dist; translationY = sin(rad) * dist
+            scaleX = rebond.coerceAtLeast(0f); scaleY = scaleX; alpha = borne(q * 3f)
+            rotationZ = (1f - doux(q)) * -90f
+        },
+        contentAlignment = Alignment.Center,
+    ) { contenu() }
+}
+
+/** Le disque de métal au centre, avec son glyphe sombre. */
+@Composable
+private fun Disque(taille: Dp = 118.dp, glyphe: androidx.compose.ui.graphics.drawscope.DrawScope.() -> Unit) {
+    Canvas(Modifier.size(taille)) {
+        drawCircle(Brush.radialGradient(listOf(Color.White.copy(alpha = 0.10f), Color.Transparent), center, size.minDimension * 0.9f), size.minDimension * 0.9f)
+        drawCircle(Metal, size.minDimension / 2)
+        drawCircle(Color.White.copy(alpha = 0.5f), size.minDimension / 2 - 1.dp.toPx(), style = androidx.compose.ui.graphics.drawscope.Stroke(1.dp.toPx()))
+        glyphe()
+    }
+}
+
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.trait() = androidx.compose.ui.graphics.drawscope.Stroke(width = size.minDimension * 0.045f, cap = StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round)
+
+/** Une petite étoile à quatre branches (scintillement). */
+@Composable
+private fun Etincelle(taille: Dp, eclat: Float) {
+    Canvas(Modifier.size(taille)) {
+        val c = center; val r = size.minDimension / 2
+        val chemin = androidx.compose.ui.graphics.Path().apply {
+            moveTo(c.x, c.y - r); quadraticTo(c.x, c.y, c.x + r, c.y); quadraticTo(c.x, c.y, c.x, c.y + r)
+            quadraticTo(c.x, c.y, c.x - r, c.y); quadraticTo(c.x, c.y, c.x, c.y - r); close()
+        }
+        drawPath(chemin, ArgentScene.copy(alpha = 0.4f + 0.6f * eclat))
+    }
+}
+
+@Composable
+private fun scintillement(reduit: Boolean, decalage: Float): Float {
+    if (reduit) return 1f
+    val tr = androidx.compose.animation.core.rememberInfiniteTransition(label = "scintille")
+    return tr.animateFloat(0f, 1f, androidx.compose.animation.core.infiniteRepeatable(tween(1600, delayMillis = (decalage * 700).toInt()), androidx.compose.animation.core.RepeatMode.Reverse), label = "s").value
+}
+
+/** 1. Le logo ; la ceinture se boucle, des étincelles l'entourent. */
+@Composable
+private fun BoxScope.IllustrationIdentite(t: Float, reduit: Boolean) {
+    val retour = LocalHapticFeedback.current
+    val boucle = remember { Animatable(if (reduit) 1f else 0f) }
+    val eclat = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        if (reduit) return@LaunchedEffect
+        kotlinx.coroutines.delay(380); boucle.animateTo(1f, tween(520))
+        retour.performHapticFeedback(HapticFeedbackType.Confirm); eclat.animateTo(1f, tween(650))
+    }
+    listOf(-150f to 0.10f, -40f to 0.18f, 20f to 0.26f, 130f to 0.34f, 200f to 0.42f).forEachIndexed { i, (a, r) ->
+        Satellite(t, r, a, 104.dp, if (i % 2 == 0) 14.dp else 10.dp) { Etincelle(if (i % 2 == 0) 14.dp else 10.dp, scintillement(reduit, i * 0.3f)) }
+    }
+    Box(Modifier.align(Alignment.Center).size(136.dp).clip(RoundedCornerShape(30))) {
+        LogoCeinture(Modifier.fillMaxSize(), boucle = boucle.value, eclat = eclat.value)
+    }
+}
+
+/** 2. L'empreinte, et des ondes qui s'en échappent. */
+@Composable
+private fun BoxScope.IllustrationGeste(t: Float, reduit: Boolean) {
+    val onde = if (reduit) 0f else {
+        val tr = androidx.compose.animation.core.rememberInfiniteTransition(label = "onde")
+        tr.animateFloat(0f, 1f, androidx.compose.animation.core.infiniteRepeatable(tween(2200, easing = LinearEasing)), label = "o").value
+    }
+    Canvas(Modifier.align(Alignment.Center).size(240.dp)) {
+        repeat(3) { k ->
+            val q = (onde + k / 3f) % 1f
+            drawCircle(ArgentScene.copy(alpha = (1f - q) * 0.35f * borne(t * 3f)), size.minDimension * (0.25f + q * 0.25f), style = androidx.compose.ui.graphics.drawscope.Stroke(1.5.dp.toPx()))
+        }
+    }
+    Disque {
+        val s = trait(); val c = center; val u = size.minDimension
+        for (i in 0 until 5) {
+            val r = u * (0.08f + i * 0.065f)
+            val debut = if (i == 0) 0f else 200f - i * 6f
+            val balayage = if (i == 0) 360f else 140f + i * 12f
+            drawArc(Encre, debut, balayage * plage(t, 0.15f + i * 0.06f, 0.5f + i * 0.06f), false, Offset(c.x - r, c.y - r * 1.15f), androidx.compose.ui.geometry.Size(r * 2, r * 2.3f), style = s)
+        }
+    }
+}
+
+/** 3. Les points d'un mot de passe apparaissent, puis un trait les barre. */
+@Composable
+private fun BoxScope.IllustrationSansMotDePasse(t: Float) {
+    Disque {
+        val s = trait(); val u = size.minDimension; val c = center
+        // une clé
+        drawCircle(Encre, u * 0.11f, Offset(c.x - u * 0.14f, c.y), style = s)
+        drawLine(Encre, Offset(c.x - u * 0.03f, c.y), Offset(c.x + u * 0.24f, c.y), s.width, StrokeCap.Round)
+        drawLine(Encre, Offset(c.x + u * 0.14f, c.y), Offset(c.x + u * 0.14f, c.y + u * 0.09f), s.width, StrokeCap.Round)
+        drawLine(Encre, Offset(c.x + u * 0.22f, c.y), Offset(c.x + u * 0.22f, c.y + u * 0.07f), s.width, StrokeCap.Round)
+    }
+    // ●●●●●● au-dessus, barrés
+    Row(Modifier.align(Alignment.TopCenter).padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+        repeat(6) { i ->
+            val q = doux(plage(t, 0.2f + i * 0.05f, 0.4f + i * 0.05f))
+            Box(Modifier.size(10.dp).graphicsLayer { scaleX = q; scaleY = q }.clip(CircleShape).background(ArgentScene))
+        }
+    }
+    Canvas(Modifier.align(Alignment.TopCenter).padding(top = 8.dp).width(118.dp).height(10.dp)) {
+        val q = doux(plage(t, 0.62f, 0.85f))
+        drawLine(RougeBoucle, Offset(-6.dp.toPx(), size.height / 2), Offset(-6.dp.toPx() + (size.width + 12.dp.toPx()) * q, size.height / 2), 2.5.dp.toPx(), StrokeCap.Round)
+    }
+}
+
+/** 4. Le logo au centre ; les apps en jaillissent, chacune à sa place. */
+@Composable
+private fun BoxScope.IllustrationApps(t: Float) {
+    val icones = listOf(R.drawable.app_messenger, R.drawable.app_drop, R.drawable.app_kunfox)
+    listOf(-90f, 30f, 150f).forEachIndexed { i, a ->
+        Satellite(t, 0.12f + i * 0.1f, a, 92.dp, 54.dp) {
+            Image(painterResource(icones[i]), null, Modifier.fillMaxSize().clip(RoundedCornerShape(percent = 26)))
+        }
+    }
+    listOf(-30f, 90f, 210f).forEachIndexed { i, a ->
+        Satellite(t, 0.42f + i * 0.08f, a, 98.dp, 8.dp) { Box(Modifier.fillMaxSize().clip(CircleShape).background(ArgentScene2)) }
+    }
+    Box(Modifier.align(Alignment.Center).size(96.dp).clip(RoundedCornerShape(30))) { LogoCeinture(Modifier.fillMaxSize(), description = null) }
+}
+
+/** 5. Le cadenas se ferme (son anse descend), puis un sceau se pose. */
+@Composable
+private fun BoxScope.IllustrationPrive(t: Float) {
+    Disque {
+        val s = trait(); val u = size.minDimension; val c = center
+        val ferme = doux(plage(t, 0.25f, 0.55f))
+        val montee = (1f - ferme) * u * 0.08f
+        drawArc(Encre, 180f, 180f, false, Offset(c.x - u * 0.12f, c.y - u * 0.25f - montee), androidx.compose.ui.geometry.Size(u * 0.24f, u * 0.26f), style = s)
+        drawLine(Encre, Offset(c.x + u * 0.12f, c.y - u * 0.12f - montee), Offset(c.x + u * 0.12f, c.y - u * 0.04f), s.width, StrokeCap.Round)
+        drawRoundRect(Encre, Offset(c.x - u * 0.2f, c.y - u * 0.05f), androidx.compose.ui.geometry.Size(u * 0.4f, u * 0.3f), androidx.compose.ui.geometry.CornerRadius(u * 0.06f))
+        drawCircle(ArgentScene, u * 0.035f, Offset(c.x, c.y + u * 0.09f))
+    }
+    Satellite(t, 0.55f, 45f, 52.dp, 40.dp) {
+        Canvas(Modifier.fillMaxSize()) {
+            drawCircle(Brush.verticalGradient(listOf(Color(0xFF2A2C31), Encre)), size.minDimension / 2)
+            drawCircle(ArgentScene, size.minDimension / 2 - 1.dp.toPx(), style = androidx.compose.ui.graphics.drawscope.Stroke(1.5.dp.toPx()))
+            val c = center; val u = size.minDimension
+            val chemin = androidx.compose.ui.graphics.Path().apply { moveTo(c.x - u * 0.18f, c.y); lineTo(c.x - u * 0.04f, c.y + u * 0.14f); lineTo(c.x + u * 0.2f, c.y - u * 0.12f) }
+            drawPath(chemin, ArgentScene, style = androidx.compose.ui.graphics.drawscope.Stroke(2.5.dp.toPx(), cap = StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round))
         }
     }
 }

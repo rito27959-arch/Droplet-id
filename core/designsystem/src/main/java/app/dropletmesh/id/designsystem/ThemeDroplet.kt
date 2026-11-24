@@ -70,11 +70,22 @@ fun ThemeDroplet(
         elevatedBackground = c.surface,
         destructive = c.erreur,
     )
+    // Le texte en Source Sans ; les grands titres (titre de page, titres 1
+    // et 2) en Source Serif : c'est là que se joue l'esprit « document ».
+    val base = glasmioTypography(SansTexte)
+    fun serif(t: androidx.compose.ui.text.TextStyle) = t.copy(fontFamily = SerifTitres, fontWeight = FontWeight.SemiBold)
+    val typographie = base.copy(
+        displayLarge = serif(base.displayLarge),
+        displayMedium = serif(base.displayMedium),
+        displaySmall = serif(base.displaySmall),
+        headlineLarge = serif(base.headlineLarge),
+        headlineMedium = serif(base.headlineMedium),
+    )
     GlasmioIconProvider(resolver = IconesDroplet) {
         GlasmioTheme(
             isDark = sombre,
             colorScheme = glasmioColorScheme(sombre, c.encre),
-            typography = glasmioTypography(SansTexte),
+            typography = typographie,
             colors = glass,
             appearance = GlassAppearance(reduceTransparency = reduireTransparence),
         ) {

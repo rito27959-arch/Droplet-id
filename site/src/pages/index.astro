@@ -1,0 +1,287 @@
+---
+// ============================================================================
+// LE SITE DE DROPLET ID — une page, une idée par section :
+//   l'identité bouclée → sans mot de passe → la clé reste ici →
+//   un identifiant par app → retirer d'un geste → télécharger.
+// Rien d'inventé : chaque phrase décrit ce que l'app fait aujourd'hui.
+// ============================================================================
+import '@fontsource-variable/inter-tight';
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const APK = 'https://github.com/rito27959-arch/Droplet-id/raw/telechargements/droplet-id.apk';
+const SOURCES = 'https://github.com/rito27959-arch/Droplet-id';
+const titre = 'Droplet ID — votre identité, bouclée.';
+const description = "Une identité pour tout Droplet. Sans mot de passe, sans e-mail. Vous approuvez chaque connexion d'un geste, et vous retirez un accès quand vous voulez.";
+---
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>{titre}</title>
+  <meta name="description" content={description} />
+  <meta name="theme-color" content="#050506" />
+  <link rel="icon" href={`${base}/logo.svg`} type="image/svg+xml" />
+  <meta property="og:title" content={titre} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+</head>
+<body>
+
+<header class="nav">
+  <div class="conteneur nav-ligne">
+    <a class="marque" href="#haut" aria-label="Droplet ID, haut de page">
+      <img src={`${base}/logo.svg`} alt="" width="28" height="28" />
+      <span>Droplet ID</span>
+    </a>
+    <nav aria-label="Sections">
+      <a href="#fonctionnement">Fonctionnement</a>
+      <a href="#securite">Sécurité</a>
+      <a href="#apps">Apps</a>
+    </nav>
+    <a class="nav-action" href={APK}>Télécharger</a>
+  </div>
+</header>
+
+<main id="haut">
+  <!-- 1. L'identité, bouclée. -->
+  <section class="hero">
+    <div class="halo" aria-hidden="true"></div>
+    <div class="conteneur hero-contenu">
+      <img class="hero-logo" src={`${base}/logo.svg`} alt="Le logo de Droplet ID : un cœur argenté tenu par une ceinture de sécurité" width="168" height="168" />
+      <h1 class="titre-1">Votre identité.<br />Bouclée.</h1>
+      <p class="chapeau">Une seule identité pour Droplet Messenger, Droplet Drop et Kunfox. Elle vit dans votre téléphone, et nulle part ailleurs.</p>
+      <div class="actions">
+        <a class="bouton bouton-metal" href={APK}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+          Télécharger pour Android
+        </a>
+        <a class="bouton bouton-contour" href="#fonctionnement">Voir comment ça marche</a>
+      </div>
+      <p class="mention">Version de test. Android 12 ou plus récent.</p>
+    </div>
+  </section>
+
+  <!-- 2. Sans mot de passe : le geste. -->
+  <section class="bloc" id="fonctionnement">
+    <div class="conteneur deux-colonnes">
+      <div class="apparait">
+        <h2 class="titre-2">Sans mot de passe.<br />Sans e-mail.</h2>
+        <p class="chapeau espace">Pour vous connecter, vous ne tapez rien que l'on puisse vous voler. Vous approuvez, sur votre téléphone.</p>
+        <ol class="etapes">
+          <li><span class="num" aria-hidden="true">1</span><div><strong>Scannez le code</strong><p class="texte">Le site ou l'app affiche un QR. Droplet ID le lit.</p></div></li>
+          <li><span class="num" aria-hidden="true">2</span><div><strong>Vérifiez le nombre</strong><p class="texte">Vous recopiez le nombre affiché par le site. Une fausse page ne peut pas le deviner.</p></div></li>
+          <li><span class="num" aria-hidden="true">3</span><div><strong>Approuvez</strong><p class="texte">Votre empreinte ou le code de votre téléphone, et c'est fait.</p></div></li>
+        </ol>
+      </div>
+
+      <div class="telephone apparait" role="img" aria-label="L'écran d'approbation de Droplet ID : se connecter à Kunfox, avec le code 482 913">
+        <div class="ecran">
+          <div class="feuille">
+            <div class="poignee"></div>
+            <img class="app-icone" src={`${base}/apps/kunfox.webp`} alt="" width="64" height="64" />
+            <p class="feuille-titre">Se connecter à Kunfox ?</p>
+            <p class="feuille-sous">kunfox.app</p>
+            <div class="code-boite">
+              <span class="code-aide">Le nombre affiché sur kunfox.app</span>
+              <span class="code">482 913</span>
+            </div>
+            <div class="lignes">
+              <div><span>Kunfox recevra</span><span>Identifiant, pseudo</span></div>
+              <div><span>Expire dans</span><span class="chiffres">4:52</span></div>
+            </div>
+            <div class="btn-approuver">Se connecter</div>
+            <div class="btn-refuser">Refuser</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. La clé reste ici. -->
+  <section class="bloc bloc-sombre" id="securite">
+    <div class="conteneur">
+      <div class="centre apparait">
+        <h2 class="titre-2">Votre clé ne quitte jamais ce téléphone.</h2>
+        <p class="chapeau centre-texte">Droplet ID crée une clé sur votre téléphone. Personne d'autre ne la possède, pas même Droplet.</p>
+      </div>
+      <div class="grille apparait">
+        <article class="carte">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/></svg>
+          <h3 class="titre-3">Créée ici</h3>
+          <p class="texte">Une clé Ed25519 naît dans le téléphone. Elle signe vos approbations ; elle n'est jamais envoyée.</p>
+        </article>
+        <article class="carte">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+          <h3 class="titre-3">Gardée par la puce</h3>
+          <p class="texte">Elle est chiffrée par le Keystore d'Android, et par la puce de sécurité quand le téléphone en a une.</p>
+        </article>
+        <article class="carte">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h7"/><path d="M17 15l4 4M21 15l-4 4"/></svg>
+          <h3 class="titre-3">Hors des sauvegardes</h3>
+          <p class="texte">Elle ne part ni dans le cloud ni vers un autre téléphone. Elle ne peut pas être copiée.</p>
+        </article>
+        <article class="carte">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="3.5"/><path d="M5.5 19a7 7 0 0 1 13 0"/><path d="M3 3l18 18"/></svg>
+          <h3 class="titre-3">Rien de personnel</h3>
+          <p class="texte">Ni numéro, ni e-mail, ni nom. Un pseudo, seulement si vous choisissez de le partager.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Un identifiant par app. -->
+  <section class="bloc" id="apps">
+    <div class="conteneur deux-colonnes inverse">
+      <div class="apparait">
+        <h2 class="titre-2">Un identifiant différent pour chaque app.</h2>
+        <p class="chapeau espace">Chaque app reçoit un identifiant qui ne vaut que pour elle. Deux apps ne peuvent pas savoir qu'il s'agit de vous.</p>
+      </div>
+      <ul class="apps apparait" aria-label="Apps qui utilisent Droplet ID">
+        <li><img src={`${base}/apps/messenger.webp`} alt="" width="56" height="56" /><div><strong>Droplet Messenger</strong><span>Messagerie chiffrée</span></div><span class="statut"><span class="point" aria-hidden="true"></span>Connectée</span></li>
+        <li><img src={`${base}/apps/drop.webp`} alt="" width="56" height="56" /><div><strong>Droplet Drop</strong><span>Partage de fichiers</span></div><span class="statut"><span class="point" aria-hidden="true"></span>Connectée</span></li>
+        <li><img src={`${base}/apps/kunfox.webp`} alt="" width="56" height="56" /><div><strong>Kunfox</strong><span>Apprentissage</span></div><span class="statut"><span class="point" aria-hidden="true"></span>Connectée</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5. Retirer d'un geste. -->
+  <section class="bloc bloc-sombre">
+    <div class="conteneur centre apparait">
+      <h2 class="titre-2">Retirer un accès prend une seconde.</h2>
+      <p class="chapeau centre-texte">Vous voyez chaque app qui utilise votre identité, depuis quand, et ce qu'elle reçoit. Un geste, et elle ne vous reconnaît plus.</p>
+      <div class="retirer" aria-hidden="true">
+        <img src={`${base}/apps/kunfox.webp`} alt="" width="44" height="44" />
+        <span>Kunfox</span>
+        <span class="retirer-btn">Retirer l'accès</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Télécharger. -->
+  <section class="fin">
+    <div class="conteneur centre apparait">
+      <img src={`${base}/logo.svg`} alt="" width="96" height="96" class="fin-logo" />
+      <h2 class="titre-2">Bouclez votre identité.</h2>
+      <p class="chapeau centre-texte">Gratuit. Pour Android 12 ou plus récent.</p>
+      <div class="actions centre-actions">
+        <a class="bouton bouton-metal" href={APK}>Télécharger pour Android</a>
+        <a class="bouton bouton-contour" href={SOURCES}>Voir le code source</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="pied">
+  <div class="conteneur pied-ligne">
+    <span>© 2026 Droplet</span>
+    <a href={SOURCES}>Code source</a>
+    <span class="pied-note">Droplet ID est en test. Il n'est pas encore sur le Play Store.</span>
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entrees) => {
+    for (const e of entrees) if (e.isIntersecting) { e.target.classList.add('est-visible'); io.unobserve(e.target); }
+  }, { rootMargin: '0px 0px -12% 0px' });
+  document.querySelectorAll('.apparait').forEach((el) => io.observe(el));
+</script>
+
+<style>
+  /* Barre de navigation : noire translucide, fine, collée en haut. */
+  .nav { position: sticky; top: 0; z-index: 10; background: rgba(5,5,6,.72); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); border-bottom: 1px solid var(--trait); }
+  .nav-ligne { display: flex; align-items: center; gap: 24px; height: 56px; }
+  .marque { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 600 16px/1 var(--titres); letter-spacing: -0.01em; }
+  .marque img { border-radius: 8px; }
+  .nav nav { display: flex; gap: 22px; margin-left: auto; }
+  .nav nav a { color: var(--argent-2); text-decoration: none; font-size: 14px; }
+  .nav nav a:hover { color: var(--argent); }
+  .nav-action { font-size: 14px; font-weight: 600; text-decoration: none; padding: 8px 14px; border-radius: 999px; background: var(--metal); color: #0e0f12; }
+  @media (max-width: 640px) { .nav nav { display: none; } .nav-action { margin-left: auto; } }
+
+  /* Le héros : le logo, le titre, deux actions. */
+  .hero { position: relative; padding: clamp(72px, 12vw, 140px) 0 clamp(80px, 12vw, 150px); text-align: center; overflow: hidden; }
+  .halo { position: absolute; left: 50%; top: 8%; width: 900px; height: 900px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(200,204,212,.14), rgba(200,204,212,0) 70%); pointer-events: none; }
+  .hero-contenu { position: relative; display: flex; flex-direction: column; align-items: center; gap: 26px; }
+  .hero-logo { width: clamp(120px, 15vw, 168px); height: auto; border-radius: 30%; box-shadow: 0 30px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.08); animation: pose 1.2s var(--courbe) both; }
+  @keyframes pose { from { opacity: 0; transform: translateY(18px) scale(.94); } to { opacity: 1; transform: none; } }
+  .hero .titre-1 { animation: pose 1.2s .12s var(--courbe) both; }
+  .hero .chapeau { text-align: center; animation: pose 1.2s .22s var(--courbe) both; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; animation: pose 1.2s .32s var(--courbe) both; }
+  .mention { margin: 0; font-size: 13px; color: var(--argent-3); }
+
+  /* Sections. */
+  .bloc { padding: clamp(88px, 12vw, 160px) 0; }
+  .bloc-sombre { background: var(--noir-2); border-block: 1px solid var(--trait); }
+  .deux-colonnes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(40px, 6vw, 96px); align-items: center; }
+  .deux-colonnes.inverse > :first-child { order: 2; }
+  @media (max-width: 860px) { .deux-colonnes { grid-template-columns: 1fr; } .deux-colonnes.inverse > :first-child { order: 0; } }
+  .espace { margin-top: 20px; }
+  .centre { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; }
+  .centre-texte { text-align: center; margin-inline: auto; }
+
+  /* Les trois étapes : c'est une vraie suite, d'où les numéros. */
+  .etapes { list-style: none; padding: 0; margin: 40px 0 0; display: flex; flex-direction: column; gap: 22px; }
+  .etapes li { display: flex; gap: 16px; align-items: flex-start; }
+  .etapes strong { display: block; font-weight: 600; font-size: 18px; margin-bottom: 2px; }
+  .num { flex: none; width: 32px; height: 32px; border-radius: 999px; display: grid; place-items: center; font: 600 15px/1 var(--titres); color: #0e0f12; background: var(--metal); }
+
+  /* Le téléphone : l'écran d'approbation, dessiné en HTML. */
+  .telephone { justify-self: center; width: min(340px, 100%); aspect-ratio: 9 / 19; border-radius: 52px; padding: 12px; background: linear-gradient(160deg, #3a3d43, #121316 40%, #2a2c31); box-shadow: 0 40px 100px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.1); }
+  .ecran { height: 100%; border-radius: 42px; background: radial-gradient(120% 60% at 50% 0%, #1b1c20, #050506 70%); display: flex; align-items: flex-end; overflow: hidden; }
+  .feuille { width: 100%; background: #16171a; border-radius: 30px 30px 0 0; padding: 10px 20px 28px; display: flex; flex-direction: column; align-items: center; border-top: 1px solid var(--trait); }
+  .poignee { width: 36px; height: 5px; border-radius: 999px; background: #3a3c41; margin-bottom: 18px; }
+  .app-icone { width: 56px; height: 56px; border-radius: 14px; }
+  .feuille-titre { margin: 14px 0 2px; font: 700 19px/1.2 var(--titres); letter-spacing: -0.015em; color: #fff; }
+  .feuille-sous { margin: 0; font-size: 13px; color: var(--argent-2); }
+  .code-boite { align-self: stretch; margin-top: 18px; background: #202227; border-radius: 18px; padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .code-aide { font-size: 11.5px; color: var(--argent-2); }
+  .code { font: 700 32px/1 var(--titres); letter-spacing: 0.04em; font-variant-numeric: tabular-nums; color: #fff; }
+  .lignes { align-self: stretch; margin-top: 10px; background: #202227; border-radius: 18px; }
+  .lignes div { display: flex; justify-content: space-between; padding: 12px 14px; font-size: 13px; }
+  .lignes div + div { border-top: 1px solid var(--trait); }
+  .lignes span:last-child { color: var(--argent-2); }
+  .chiffres { font-variant-numeric: tabular-nums; }
+  .btn-approuver { align-self: stretch; margin-top: 18px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-weight: 600; font-size: 15px; color: #0e0f12; background: var(--metal); }
+  .btn-refuser { margin-top: 10px; font-size: 14px; color: var(--argent-2); }
+
+  /* Les quatre garanties. */
+  .grille { margin-top: 64px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 980px) { .grille { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .grille { grid-template-columns: 1fr; } }
+  .carte { background: var(--graphite); border: 1px solid var(--trait); border-radius: 24px; padding: 28px 24px; display: flex; flex-direction: column; gap: 12px; }
+  .ic { width: 30px; height: 30px; fill: none; stroke: var(--argent); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 6px; }
+
+  /* Les apps connectées, avec leurs vraies icônes. */
+  .apps { list-style: none; margin: 0; padding: 8px; background: var(--graphite); border: 1px solid var(--trait); border-radius: 28px; }
+  .apps li { display: flex; align-items: center; gap: 16px; padding: 14px 12px; }
+  .apps li + li { border-top: 1px solid var(--trait); }
+  .apps img { width: 52px; height: 52px; border-radius: 13px; }
+  .apps div { flex: 1; display: flex; flex-direction: column; }
+  .apps strong { font-weight: 600; }
+  .apps div span { font-size: 14px; color: var(--argent-2); }
+  .statut { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--argent-2); }
+  .point { width: 8px; height: 8px; border-radius: 999px; background: var(--argent); box-shadow: 0 0 0 3px rgba(255,255,255,.08); }
+
+  /* Retirer : la seule touche de rouge de la page, comme le bouton de la boucle. */
+  .retirer { margin-top: 28px; display: flex; align-items: center; gap: 14px; padding: 12px 12px 12px 14px; background: var(--graphite); border: 1px solid var(--trait); border-radius: 20px; width: min(420px, 100%); }
+  .retirer img { border-radius: 11px; }
+  .retirer span:nth-of-type(1) { flex: 1; text-align: left; font-weight: 600; }
+  .retirer-btn { background: var(--rouge); color: #fff; font-weight: 600; font-size: 14px; padding: 10px 16px; border-radius: 999px; }
+
+  /* La fin. */
+  .fin { padding: clamp(100px, 14vw, 180px) 0; background: radial-gradient(60% 50% at 50% 30%, rgba(200,204,212,.10), transparent 70%); }
+  .fin-logo { border-radius: 30%; box-shadow: 0 24px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.08); }
+  .centre-actions { margin-top: 8px; animation: none; }
+
+  .pied { border-top: 1px solid var(--trait); padding: 28px 0 40px; font-size: 13px; color: var(--argent-3); }
+  .pied-ligne { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; }
+  .pied a { color: var(--argent-2); text-decoration: none; }
+  .pied a:hover { color: var(--argent); }
+  .pied-note { margin-left: auto; }
+  @media (max-width: 640px) { .pied-note { margin-left: 0; } }
+</style>
+</body>
+</html>

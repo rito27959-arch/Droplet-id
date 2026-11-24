@@ -1,0 +1,81 @@
+/* ==========================================================================
+   DROPLET ID — la palette du logo.
+   Le noir du fond, l'argent du cœur, le graphite de la sangle, et le rouge
+   du bouton de la boucle : une seule touche de rouge par écran.
+   ========================================================================== */
+:root {
+  --noir: #050506;
+  --noir-2: #0e0f12;
+  --graphite: #1b1c20;
+  --graphite-2: #2a2c31;
+  --trait: rgba(255, 255, 255, 0.09);
+  --argent: #e6e8eb;
+  --argent-2: #a4a8af;      /* 7,9:1 sur le noir */
+  --argent-3: #7c8189;      /* 4,9:1 sur le noir : petits textes seulement */
+  --rouge: #e03a2f;
+  --metal: linear-gradient(180deg, #ffffff 0%, #c3c6cc 55%, #8e939a 100%);
+  --titres: 'Inter Tight Variable', 'Inter Tight', system-ui, sans-serif;
+  --texte: 'Inter Variable', Inter, system-ui, sans-serif;
+  --courbe: cubic-bezier(0.16, 1, 0.3, 1);
+  --large: min(1120px, 100% - 40px);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--noir);
+  color: var(--argent);
+  font-family: var(--texte);
+  font-size: 17px;
+  line-height: 1.5;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--rouge); outline-offset: 3px; border-radius: 6px; }
+
+.conteneur { width: var(--large); margin-inline: auto; }
+
+/* Titres : Inter Tight, serrés, argentés. */
+.titre-1, .titre-2, .titre-3 {
+  font-family: var(--titres);
+  font-weight: 700;
+  margin: 0;
+  text-wrap: balance;
+  background: linear-gradient(180deg, #ffffff 10%, #b9bdc4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.titre-1 { font-size: clamp(44px, 8.6vw, 104px); line-height: 1.0; letter-spacing: -0.035em; }
+.titre-2 { font-size: clamp(34px, 5.6vw, 64px); line-height: 1.05; letter-spacing: -0.03em; }
+.titre-3 { font-size: clamp(22px, 2.4vw, 28px); line-height: 1.2; letter-spacing: -0.02em; }
+.chapeau { font-size: clamp(19px, 2vw, 24px); line-height: 1.4; color: var(--argent-2); margin: 0; text-wrap: pretty; max-width: 34ch; }
+.texte { color: var(--argent-2); margin: 0; text-wrap: pretty; }
+
+/* Boutons : le principal est en métal, le secondaire en contour. */
+.bouton {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 52px; padding: 0 26px; border-radius: 999px;
+  font: 600 17px/1 var(--texte); text-decoration: none; letter-spacing: -0.01em;
+  transition: transform 200ms var(--courbe), filter 200ms var(--courbe);
+}
+.bouton:active { transform: scale(0.97); }
+.bouton-metal { background: var(--metal); color: #0e0f12; box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 10px 30px rgba(0,0,0,.5); }
+.bouton-metal:hover { filter: brightness(1.06); }
+.bouton-contour { color: var(--argent); border: 1px solid rgba(255,255,255,.22); }
+.bouton-contour:hover { border-color: rgba(255,255,255,.45); }
+
+/* Une seule apparition par section, déclenchée par le défilement. */
+.apparait { opacity: 0; transform: translateY(28px); transition: opacity 900ms var(--courbe), transform 900ms var(--courbe); }
+.apparait.est-visible { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .apparait { opacity: 1; transform: none; transition: none; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

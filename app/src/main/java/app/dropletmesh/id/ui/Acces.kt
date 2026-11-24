@@ -107,6 +107,12 @@ fun Acces(ui: UiApp, nav: Navigation, onRafraichir: () -> Unit, enOnglet: Boolea
 @Composable
 fun Initiale(nom: String, taille: Int = 32) {
     val c = Droplet.couleurs
+    // Les apps de la famille Droplet ont leur icône officielle.
+    val icone = iconeOfficielle(nom)
+    if (icone != null) {
+        androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(icone), null, Modifier.size(taille.dp).clip(RoundedCornerShape((taille * 0.26f).dp)))
+        return
+    }
     Box(
         Modifier.size(taille.dp).clip(RoundedCornerShape((taille * 0.24f).dp)).background(c.surfaceElevee),
         contentAlignment = Alignment.Center,
@@ -166,5 +172,16 @@ fun DetailConnexion(ui: UiApp, clientId: String, nav: Navigation, onRetirer: (Co
                 GlasmioAlertButtonSpec("Retirer", { confirmer = false; onRetirer(cx) }, role = GlasmioAlertButtonRole.Destructive),
             ),
         )
+    }
+}
+
+/** L'icône officielle d'une app de la famille Droplet, d'après son nom. */
+fun iconeOfficielle(nom: String): Int? {
+    val n = nom.lowercase()
+    return when {
+        "kunfox" in n -> app.dropletmesh.id.R.drawable.app_kunfox
+        "drop" in n && "droplet drop" in n -> app.dropletmesh.id.R.drawable.app_drop
+        "messenger" in n || n == "droplet" -> app.dropletmesh.id.R.drawable.app_messenger
+        else -> null
     }
 }

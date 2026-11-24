@@ -58,7 +58,7 @@ fun Securite(ui: UiApp, nav: Navigation, onOublier: () -> Unit, enOnglet: Boolea
             GlasmioListRow(
                 title = "Clé de ce téléphone",
                 subtitle = "Ed25519, créée ici, jamais envoyée",
-                leading = { Pastille(Icone.PASSKEY, teinte = c.goutte) },
+                leading = { Pastille(Icone.PASSKEY) },
                 showTopSeparator = false,
             )
             GlasmioListRow(
@@ -76,7 +76,7 @@ fun Securite(ui: UiApp, nav: Navigation, onOublier: () -> Unit, enOnglet: Boolea
             GlasmioListRow(
                 title = "Verrouillage de l'écran",
                 detail = if (a.verrouEcran) "Activé" else "Désactivé",
-                leading = { Pastille(Icone.SECURITE, teinte = if (a.verrouEcran) c.succes else c.erreur) },
+                leading = { Pastille(Icone.SECURITE, teinte = if (a.verrouEcran) null else c.erreur) },
                 onClick = { ouvrirReglage(ActionSecurite.VerrouEcran) },
                 showTopSeparator = false,
             )

@@ -22,7 +22,9 @@ jobs:
           # Le plugin Android installe la plateforme qui manque (licences acceptées sur les machines GitHub).
       - uses: gradle/actions/setup-gradle@v4
       - name: Compiler et tester
-        run: ./gradlew --no-daemon --stacktrace :core:designsystem:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebug :app:assembleRelease :app:bundleRelease
+        run: |
+          ./gradlew --no-daemon --stacktrace :core:designsystem:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebug :app:assembleRelease
+          ./gradlew --no-daemon :app:bundleRelease
       - name: Tailles
         run: |
           ls -la app/build/outputs/apk/debug/ app/build/outputs/apk/release/ app/build/outputs/bundle/release/

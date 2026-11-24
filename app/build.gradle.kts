@@ -53,7 +53,8 @@ android {
     // chaque téléphone ne télécharge que la sienne.
     splits {
         abi {
-            isEnable = true
+            // Pas pour l'AAB : Google Play fait lui-même le découpage.
+            isEnable = gradle.startParameter.taskNames.none { it.contains("bundle", ignoreCase = true) }
             reset()
             include("arm64-v8a", "armeabi-v7a", "x86_64")
             isUniversalApk = false

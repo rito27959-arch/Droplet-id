@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rien de Droplet ID ne part dans les sauvegardes Android ni dans les
+     transferts d'appareil : la clé chiffrée n'aurait de toute façon aucun
+     sens sans le Keystore du téléphone d'origine. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+        <exclude domain="sharedpref" />
+        <exclude domain="database" />
+        <exclude domain="file" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+        <exclude domain="sharedpref" />
+        <exclude domain="database" />
+        <exclude domain="file" />
+    </device-transfer>
+</data-extraction-rules>

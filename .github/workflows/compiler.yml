@@ -1,0 +1,33 @@
+name: Compiler
+# Compile l'app (debug), lance les tests unitaires et publie l'APK de debug
+# comme artefact de l'exécution. Aucune clé de signature n'est utilisée ici.
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compiler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Plateforme Android 37
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37" > /dev/null
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Compiler et tester
+        run: ./gradlew --no-daemon --stacktrace :core:designsystem:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebug
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: droplet-id-debug
+          path: app/build/outputs/apk/debug/*.apk
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: rapports
+          path: '**/build/reports/**'

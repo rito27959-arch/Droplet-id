@@ -1,0 +1,14 @@
+# Gradle et Android Studio
+.gradle/
+build/
+.idea/
+*.iml
+.kotlin/
+captures/
+
+# Jamais dans le dépôt : chemins locaux, clés de signature, configuration Firebase.
+local.properties
+key.properties
+*.jks
+*.keystore
+google-services.json

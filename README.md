@@ -1,43 +1,110 @@
-# Droplet ID pour Android
+<div align="center">
 
-L'app native de Droplet ID : votre identité Droplet tient dans ce téléphone. Elle sert à se connecter aux apps et aux sites « Continuer avec Droplet ID » sans mot de passe, sans e-mail et sans numéro.
+<img src="site/public/logo.svg" width="96" height="96" alt="Droplet ID">
 
-## Ce que fait l'app
+# Droplet ID
 
-- **Créer son Droplet ID** : une clé Ed25519 est créée sur le téléphone. Le service `id.dropletmesh.app` ne reçoit que la clé publique et le modèle du téléphone.
-- **Approuver une connexion** : on scanne le code du site (ou on l'ouvre par le lien « Ouvrir dans Droplet ID »), on tape le nombre affiché, puis on déverrouille le téléphone (empreinte, visage ou code). La requête est signée par la clé de l'appareil.
-- **Voir et retirer les accès** : la liste des apps connectées, ce que chacune reçoit, et le retrait en deux gestes.
-- **Sécurité** : l'état réel du téléphone (verrouillage, biométrie, puce StrongBox) avec les actions recommandées, et « Oublier Droplet ID sur ce téléphone ».
-- **Compte** : apparence (système, clair ou sombre), réduction de la transparence, langue et notifications (réglages Android), ce qui est conservé, licences.
+**Your identity, buckled to your phone.**
 
-L'API utilisée est celle du service déjà en production, la même que le module Droplet ID de l'app Droplet. Le protocole des requêtes signées est décrit dans `app/src/main/java/app/dropletmesh/id/donnees/Protocole.kt`.
+Sign in to apps and websites with one gesture — no password, no e-mail, no phone number.
 
-## Direction artistique
+[![Build](https://github.com/rito27959-arch/Droplet-id/actions/workflows/compiler.yml/badge.svg)](https://github.com/rito27959-arch/Droplet-id/actions/workflows/compiler.yml)
+![Android](https://img.shields.io/badge/Android-12%2B-0A0A0A?style=flat-square&logo=android&logoColor=white)
+![Kotlin](https://img.shields.io/badge/Kotlin-Jetpack%20Compose-0A0A0A?style=flat-square&logo=kotlin&logoColor=white)
+![Keys](https://img.shields.io/badge/keys-Ed25519%20%C2%B7%20Android%20Keystore-C9CCD1?style=flat-square)
+![Version](https://img.shields.io/badge/version-0.1.0-8B9097?style=flat-square)
 
-- **Composants : [Glasmio](https://github.com/NEORUAA/Glasmio) 0.1.4** (Apache 2.0). Il fournit les listes groupées, les pages à grand titre, la barre d'onglets et les boutons en verre, les alertes, l'interrupteur et le contrôle segmenté.
-- **Couleurs : Encre et laiton.** L'encre (graphite) porte les actions. Le laiton est réservé à l'autorité : le sceau, la carte d'identité et le focus. Le rouge sert seulement aux erreurs et aux actions destructives. Les jetons sont dans `core/designsystem/.../Couleurs.kt`.
-- **Typographie : Source Serif 4** pour les grands titres, **Source Sans 3** pour le texte et **Source Code Pro** pour les identifiants. Ce sont trois polices variables sous licence SIL OFL 1.1, embarquées dans l'app ; leurs licences sont dans `licences/`.
-- **Carte d'identité** : au format carte bancaire et noire dans les deux modes. Son guilloché est calculé à partir de l'identifiant, donc chaque carte a le sien.
+[**Website**](https://dropletid.dropletmesh.app) &nbsp;·&nbsp; [**How it works**](https://dropletid.dropletmesh.app/fonctionnement/) &nbsp;·&nbsp; [**Security**](https://dropletid.dropletmesh.app/securite/) &nbsp;·&nbsp; [**Developers**](https://dropletid.dropletmesh.app/developpeurs/)
 
-## Sécurité
+<br>
 
-- La graine Ed25519 est chiffrée par Tink (AES-256-GCM), avec une clé maîtresse gardée dans le Keystore Android. Elle n'est jamais envoyée.
-- Le serveur ne vérifie pas encore la biométrie. Elle protège seulement l'accès à l'écran d'approbation, car la clé de signature n'est pas encore liée au déverrouillage dans le Keystore. Lier la clé au déverrouillage demande que le serveur accepte une clé Keystore ; c'est la prochaine étape côté serveur.
-- Les données de l'app sont exclues des sauvegardes et des transferts d'appareil. Aucun trafic en clair n'est autorisé.
-- Aucun secret dans le dépôt ni dans l'APK : pas de clé d'API, pas de secret client.
+<img src="site/public/apercu.png" width="860" alt="Droplet ID — the silver heart buckled by a seatbelt">
 
-## Ce qui n'existe pas encore
+</div>
 
-La récupération de compte depuis un autre appareil, les passkeys côté serveur, l'historique des connexions, les sessions et l'identité vérifiable (SD-JWT) demandent de nouvelles API sur le serveur. L'app affiche honnêtement ce qui manque (par exemple « Récupération : pas encore disponible ») au lieu de montrer de fausses données.
+<br>
 
-## Compiler
+## Overview
 
-Il faut le JDK 21 et le SDK Android (plateforme 37). Glasmio compile contre l'API 37.
+Droplet ID is the native Android app behind **“Continue with Droplet ID”**. Your identity is a key created on your phone; it never leaves it. Approving a sign-in takes a scan, a number and your fingerprint.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant S as Website or app
+    participant API as id.dropletmesh.app
+    participant P as Droplet ID (your phone)
+    S->>API: Start sign-in
+    API-->>S: QR code + a number
+    P->>S: Scan the code (or open the link)
+    P->>P: Tap the matching number, unlock (fingerprint, face or PIN)
+    P->>API: Request signed with the device's Ed25519 key
+    API-->>S: Signed-in ✓
+```
+
+## What the app does
+
+| | |
+|:--|:--|
+| **Create your Droplet ID** | An Ed25519 key is generated on the phone. The service only receives the public key and the phone model. |
+| **Approve a sign-in** | Scan the site's code, tap the number shown, unlock. The request is signed by the device key. |
+| **See and revoke access** | Every connected app, what it receives, and removal in two gestures. |
+| **Security** | The phone's real state — screen lock, biometrics, StrongBox — with recommended actions, and *Forget Droplet ID on this phone*. |
+| **Settings** | Appearance, reduced transparency, language and notifications, what is stored, licences. |
+
+The API is the production service shared with the Droplet ID module of the Droplet messenger. The signed-request protocol is documented in [`Protocole.kt`](app/src/main/java/app/dropletmesh/id/donnees/Protocole.kt).
+
+## Design
+
+- **Palette — black and silver**, taken from the logo: a silver heart wrapped and sealed by a seatbelt, with a single red buckle button. Red is otherwise reserved for alerts and destructive actions. Tokens live in `core/designsystem/.../Couleurs.kt`.
+- **Components — [Glasmio](https://github.com/NEORUAA/Glasmio) 0.1.4** (Apache-2.0): glass tab bar that compacts on scroll, large-title pages, grouped lists, alert dialogs, elastic iOS-style overscroll.
+- **Type — Inter and Inter Tight**, variable fonts under SIL OFL 1.1, bundled with the app ([`licences/`](licences)).
+- **Motion** — an opening sequence that buckles the logo, a five-page onboarding, staggered list groups. Everything respects *Remove animations*.
+
+## Security model
+
+- The Ed25519 seed is encrypted with Tink (AES-256-GCM) under a master key held in the Android Keystore. It is never transmitted.
+- App data is excluded from backups and device-to-device transfers. Cleartext traffic is disabled.
+- No secret ships in the repository or the APK — no API key, no client secret.
+- **Known limit:** the server does not yet verify biometrics. Unlocking currently guards the approval screen; binding the signing key to user authentication requires the server to accept a Keystore-backed key. That is the next server-side step.
+
+## Not built yet
+
+Account recovery from another device, server-side passkeys, sign-in history, sessions and verifiable identity (SD-JWT) need new server APIs. The app says so honestly — for example *Recovery: not available yet* — rather than showing placeholder data.
+
+## Build
+
+Requires JDK 21 and the Android SDK (platform 37).
 
 ```sh
 ./gradlew :app:assembleDebug :app:testDebugUnitTest :core:designsystem:testDebugUnitTest
 ```
 
-La CI (`.github/workflows/compiler.yml`) compile et teste à chaque envoi, puis publie l'APK de debug comme artefact de l'exécution.
+Every push to `main` builds the APKs in CI and publishes them to the [`telechargements`](../../tree/telechargements) branch; UI captures are published to [`captures`](../../tree/captures).
 
-Android 12 (API 31) minimum. Sur Android 12 et 12L, Glasmio affiche un verre simplifié ; la réfraction complète demande Android 13.
+<details>
+<summary><strong>Repository layout</strong></summary>
+
+<br>
+
+| Path | Contents |
+|:--|:--|
+| `app/` | The Android app: onboarding, account, apps, security, approval, scanner |
+| `core/designsystem/` | Colours, type, icons, the seatbelt logo (`LogoCeinture`), shared components |
+| `site/` | The Astro website at [dropletid.dropletmesh.app](https://dropletid.dropletmesh.app) |
+| `licences/` | Third-party licences bundled with the app |
+
+</details>
+
+<br>
+
+<div align="center">
+<sub>
+<a href="https://dropletmesh.app">Droplet</a> &nbsp;·&nbsp;
+<a href="https://dropletid.dropletmesh.app">Droplet ID</a> &nbsp;·&nbsp;
+<a href="https://drop.dropletmesh.app">Droplet Drop</a> &nbsp;·&nbsp;
+<a href="https://web.dropletmesh.app">Droplet Web</a>
+<br><br>
+Designed and built in Yaoundé, Cameroon.
+</sub>
+</div>

@@ -1,0 +1,56 @@
+---
+// TÉLÉCHARGER — le logo monte et se boucle, puis les deux fichiers et les étapes d'installation.
+import Page from '../layouts/Page.astro';
+import Logo from '../components/Logo.astro';
+import { APK, APK_ANCIENS } from '../site';
+---
+<Page titre="Télécharger" description="Téléchargez Droplet ID pour Android 12 ou plus récent." finale={false}>
+  <section class="scene dl-scene" data-scene="epingle" id="dl">
+    <div class="epingle">
+      <div class="dl-halo" aria-hidden="true"></div>
+      <div class="conteneur centre dl">
+        <div class="dl-logo boite-logo"><Logo id="dl" taille={200} label="Logo de Droplet ID" /></div>
+        <h1 class="titre-1">Droplet ID pour Android.</h1>
+        <p class="chapeau centre-texte">Version de test. Android 12 ou plus récent. Pas encore sur le Play Store.</p>
+        <div class="actions">
+          <a class="bouton bouton-metal" href={APK}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+            Télécharger l'APK
+          </a>
+          <a class="bouton bouton-contour" href={APK_ANCIENS}>Pour les téléphones plus anciens</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloc bloc-sombre">
+    <div class="conteneur">
+      <h2 class="titre-2 apparait">Installer en trois étapes.</h2>
+      <ol class="installer">
+        <li class="apparait" style="--d:0"><span>1</span><div><h3 class="titre-3">Téléchargez le fichier</h3><p class="texte">Le premier bouton convient à la plupart des téléphones récents. Le second est pour les téléphones de plus de cinq ans environ.</p></div></li>
+        <li class="apparait" style="--d:1"><span>2</span><div><h3 class="titre-3">Ouvrez-le</h3><p class="texte">Android vous demande d'autoriser votre navigateur à installer des apps. Acceptez pour ce fichier.</p></div></li>
+        <li class="apparait" style="--d:2"><span>3</span><div><h3 class="titre-3">Créez votre identité</h3><p class="texte">Choisissez un pseudo. Votre téléphone crée votre clé, et c'est prêt.</p></div></li>
+      </ol>
+    </div>
+  </section>
+</Page>
+
+<script>
+  import { surScene, boucler, plage } from '../scripts/moteur';
+  surScene(document.getElementById('dl'), (p, s) => {
+    boucler(s.querySelector('svg.logo'), plage(p, 0.05, 0.45));
+    s.style.setProperty('--a', String(plage(p, 0.0, 0.5)));
+  });
+</script>
+
+<style>
+  .dl-scene { height: 200vh; }
+  .dl-halo { position: absolute; left: 50%; top: 44%; width: 900px; height: 900px; transform: translate(-50%, -50%); background: radial-gradient(closest-side, rgba(200,204,212, calc(0.05 + var(--a, 1) * 0.1)), transparent 70%); }
+  .dl { position: relative; }
+  .dl-logo { width: clamp(120px, 22vh, 200px); aspect-ratio: 1; box-shadow: 0 40px 100px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.08); transform: perspective(900px) rotateX(calc((1 - var(--a, 1)) * 40deg)) translateY(calc((1 - var(--a, 1)) * 60px)); }
+  .installer { list-style: none; padding: 0; margin: 48px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 860px) { .installer { grid-template-columns: 1fr; } }
+  .installer li { background: var(--graphite); border: 1px solid var(--trait); border-radius: 24px; padding: 28px 24px; display: flex; flex-direction: column; gap: 18px; }
+  .installer li > span { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 600 16px/1 var(--titres); background: var(--metal); color: #0e0f12; }
+  .installer div { display: flex; flex-direction: column; gap: 10px; }
+</style>

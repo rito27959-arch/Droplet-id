@@ -1,0 +1,23 @@
+---
+import Page from '../layouts/Page.astro';
+import Document from '../components/Document.astro';
+import { SIGNALER, lien } from '../site';
+const sections = [
+  { id: 'test', titre: 'Une version de test' },
+  { id: 'usage', titre: 'Votre usage' },
+  { id: 'cle', titre: 'Votre clé' },
+  { id: 'service', titre: 'Le service' },
+  { id: 'fin', titre: 'Arrêter' },
+  { id: 'contact', titre: 'Nous écrire' },
+];
+---
+<Page titre="Conditions" description="Les conditions d'utilisation de la version de test de Droplet ID." finale={false}>
+  <Document titre="Conditions d'utilisation." misAJour="24 novembre 2026" sections={sections}>
+    <section id="test"><h2>Une version de test</h2><p>Droplet ID est en version de test. Il peut changer, s'interrompre ou contenir des erreurs. Ces conditions sont provisoires : elles seront relues et complétées avant la publication sur le Play Store.</p></section>
+    <section id="usage"><h2>Votre usage</h2><p>Vous utilisez Droplet ID pour vous connecter à des apps avec votre propre identité. N'essayez pas d'approuver une connexion à la place de quelqu'un d'autre, ni de contourner les protections du service.</p></section>
+    <section id="cle"><h2>Votre clé</h2><p>Votre clé vit dans votre téléphone et vous seul y avez accès. Gardez votre téléphone verrouillé. Si vous le perdez, il n'existe pas encore de récupération : il faudra recréer une identité.</p></section>
+    <section id="service"><h2>Le service</h2><p>Droplet fait de son mieux pour que le service fonctionne et protège vos données, comme décrit dans <a href={lien('/confidentialite/')}>la page Confidentialité</a>. Pendant la phase de test, aucune garantie de disponibilité n'est donnée.</p></section>
+    <section id="fin"><h2>Arrêter</h2><p>Vous pouvez arrêter à tout moment : « Oublier ce téléphone » efface votre clé et retire l'appareil de votre compte.</p></section>
+    <section id="contact"><h2>Nous écrire</h2><p>Une question sur ces conditions ? Ouvrez un ticket sur <a href={SIGNALER}>la page GitHub du projet</a>.</p></section>
+  </Document>
+</Page>

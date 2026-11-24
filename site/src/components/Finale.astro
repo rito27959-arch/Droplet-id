@@ -1,0 +1,148 @@
+---
+// ============================================================================
+// LA FIN DE CHAQUE PAGE — une scène de cinéma en quatre temps :
+//   1. une poussière d'argent flotte en profondeur, puis converge et dessine
+//      le cœur, en tournant comme un objet en 3D ;
+//   2. la poussière s'efface : le vrai logo se pose à sa place ;
+//   3. la ceinture se boucle (éclat, vibration) ;
+//   4. « DROPLET ID » monte lettre à lettre, l'appel à télécharger arrive.
+// Avec « réduire les animations », on voit directement le logo et le texte.
+// ============================================================================
+import Logo from './Logo.astro';
+import { lien, SOURCES } from '../site';
+const nom = 'DROPLET ID'.split('');
+---
+<section class="finale" data-scene="epingle" data-finale>
+  <div class="finale-epingle">
+    <div class="finale-lumiere" aria-hidden="true"></div>
+    <canvas class="poussiere" aria-hidden="true"></canvas>
+    <div class="finale-logo boite-logo"><Logo id="finale" taille={150} /></div>
+    <div class="finale-contenu">
+      <h2 class="titre-2 finale-titre">Bouclez votre identité.</h2>
+      <p class="chapeau finale-chapeau">Gratuit. Pour Android 12 ou plus récent.</p>
+      <div class="actions finale-actions">
+        <a class="bouton bouton-metal" href={lien('/telecharger/')}>Télécharger Droplet ID</a>
+        <a class="bouton bouton-contour" href={SOURCES}>Voir le code source</a>
+      </div>
+    </div>
+    <p class="nom-geant" aria-hidden="true">{nom.map((l, i) => <span style={`--i:${i}`}>{l === ' ' ? ' ' : l}</span>)}</p>
+  </div>
+</section>
+
+<script>
+  import { surScene, boucler, plage, doux, calme } from '../scripts/moteur';
+
+  const HEART = 'M256 380 C 152 316 122 262 122 220 C 122 176 156 146 196 146 C 225 146 246 163 256 184 C 266 163 287 146 316 146 C 356 146 390 176 390 220 C 390 262 360 316 256 380 Z';
+
+  document.querySelectorAll<HTMLElement>('[data-finale]').forEach((scene) => {
+    const canvas = scene.querySelector<HTMLCanvasElement>('canvas.poussiere')!;
+    const ctx = canvas.getContext('2d')!;
+    const logo = scene.querySelector<SVGElement>('svg.logo');
+
+    // Les cibles : des points tirés à l'intérieur du cœur (et un peu plus sur son bord).
+    const echantillon = document.createElement('canvas');
+    echantillon.width = echantillon.height = 256;
+    const ec = echantillon.getContext('2d', { willReadFrequently: true })!;
+    ec.scale(0.5, 0.5); ec.fill(new Path2D(HEART));
+    const pixels = ec.getImageData(0, 0, 256, 256).data;
+    const dedans = (x: number, y: number) => pixels[(Math.round(y) * 256 + Math.round(x)) * 4 + 3] > 128;
+    const cibles: [number, number][] = [];
+    for (let y = 0; y < 256; y += 3.2) for (let x = 0; x < 256; x += 3.2) {
+      if (!dedans(x, y)) continue;
+      const bord = !dedans(x - 4, y) || !dedans(x + 4, y) || !dedans(x, y - 4) || !dedans(x, y + 4);
+      cibles.push([(x - 128) / 134, (y - 131) / 134]);
+      if (bord) cibles.push([(x - 128) / 134, (y - 131) / 134]);
+    }
+
+    // Graine fixe : la même poussière à chaque visite.
+    let g = 42;
+    const hasard = () => ((g = (g * 1664525 + 1013904223) % 4294967296) / 4294967296);
+    const max = matchMedia('(max-width: 700px)').matches ? 900 : 1800;
+    const grains = cibles.slice(0, max).map(([tx, ty]) => {
+      const th = hasard() * Math.PI * 2, ph = Math.acos(2 * hasard() - 1), r = 1.4 + hasard() * 2.2;
+      return { tx, ty, tz: (hasard() - 0.5) * 0.08,
+        sx: r * Math.sin(ph) * Math.cos(th), sy: r * Math.sin(ph) * Math.sin(th) * 0.7, sz: r * Math.cos(ph),
+        d: hasard() * 0.35, t: 0.5 + hasard() * 1.4, f: hasard() * Math.PI * 2 };
+    });
+
+    let largeur = 0, hauteur = 0, ratio = 1;
+    const dimensionner = () => {
+      ratio = Math.min(2, devicePixelRatio || 1);
+      largeur = canvas.clientWidth; hauteur = canvas.clientHeight;
+      canvas.width = largeur * ratio; canvas.height = hauteur * ratio;
+    };
+    dimensionner(); addEventListener('resize', dimensionner);
+
+    let progression = 0;
+    surScene(scene, (p) => {
+      progression = p;
+      const conv = plage(p, 0.04, 0.5);
+      scene.style.setProperty('--logo', String(doux(plage(p, 0.46, 0.6))));
+      boucler(logo, calme ? 1 : plage(p, 0.58, 0.74));
+      scene.style.setProperty('--n', String(plage(p, 0.62, 0.9)));
+      scene.style.setProperty('--c', String(plage(p, 0.72, 0.92)));
+      scene.style.setProperty('--conv', String(conv));
+    });
+
+    if (calme) { canvas.style.display = 'none'; return; }
+
+    const dessiner = (temps: number) => {
+      const r = scene.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < innerHeight && progression < 0.66) {
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx.clearRect(0, 0, largeur, hauteur);
+        const S = Math.min(largeur, hauteur) * 0.2;
+        const cx = largeur / 2, cy = hauteur * 0.36;
+        const s = temps / 1000;
+        const fondu = 1 - plage(progression, 0.5, 0.62);
+        for (const q of grains) {
+          const e = doux(plage(plage(progression, 0.04, 0.5), q.d, q.d + 0.65));
+          // de l'éparpillement à la cible, avec une rotation qui ralentit en arrivant
+          let x = q.sx + (q.tx - q.sx) * e, y = q.sy + (q.ty - q.sy) * e, z = q.sz + (q.tz - q.sz) * e;
+          const a = (1 - e) * 1.6 + Math.sin(s * 0.4) * 0.08 * (1 - e);
+          const ca = Math.cos(a), sa = Math.sin(a);
+          [x, z] = [x * ca + z * sa, -x * sa + z * ca];
+          const flotte = (1 - e) * 0.03;
+          x += Math.sin(s * q.t + q.f) * flotte; y += Math.cos(s * q.t + q.f) * flotte;
+          const persp = 1 / (1 + Math.max(-2.2, Math.min(4, z)) * 0.3);
+          const px = cx + x * S * persp, py = cy + y * S * persp;
+          const taille = (0.9 + 1.1 * persp) * (1 - e * 0.3);
+          const eclat = 0.25 + 0.75 * e;
+          ctx.globalAlpha = Math.max(0, Math.min(1, persp * eclat * fondu));
+          ctx.fillStyle = e > 0.95 ? '#ffffff' : '#c9ccd1';
+          ctx.beginPath(); ctx.arc(px, py, taille, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      } else if (progression >= 0.66) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      requestAnimationFrame(dessiner);
+    };
+    requestAnimationFrame(dessiner);
+  });
+</script>
+
+<style>
+  .finale { position: relative; height: 340vh; background: var(--noir); }
+  .finale-epingle { position: sticky; top: 0; height: 100svh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+  html:not(.anime) .finale { height: auto; }
+  html:not(.anime) .finale-epingle { position: relative; height: auto; padding: 120px 0 34vw; }
+  .finale-lumiere { position: absolute; inset: 0; background:
+    radial-gradient(520px circle at var(--mx, 50%) var(--my, 40%), rgba(200,204,212,.08), transparent 60%),
+    radial-gradient(60% 45% at 50% 36%, rgba(200,204,212, calc(0.04 + var(--conv, 1) * 0.08)), transparent 70%); pointer-events: none; }
+  .poussiere { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* Le logo se pose exactement où la poussière a dessiné le cœur (même centre, même taille). */
+  .finale { --taille: calc(min(100vw, 100svh) * 0.2 / 0.523); }
+  .finale-logo { position: absolute; left: 50%; top: 36svh; width: var(--taille); max-width: 300px; aspect-ratio: 1; border-radius: 30%; overflow: hidden; z-index: 2;
+    box-shadow: 0 30px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255, calc(var(--logo, 1) * 0.1));
+    opacity: var(--logo, 1); transform: translate(-50%, -51.4%) translateY(calc(var(--c, 1) * -6svh)) scale(calc(0.94 + var(--logo, 1) * 0.06 - var(--c, 1) * 0.22)); }
+  .finale-contenu { position: absolute; left: 0; right: 0; top: calc(36svh + min(var(--taille), 300px) * 0.36); z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; padding: 0 20px; }
+  html:not(.anime) .finale-logo, html:not(.anime) .finale-contenu { position: relative; left: auto; top: auto; transform: none; }
+  .finale-logo :global(svg) { width: 100%; height: 100%; }
+  .finale-titre, .finale-chapeau, .finale-actions { opacity: var(--c, 1); transform: translateY(calc((1 - var(--c, 1)) * 30px)); }
+  .finale-chapeau { text-align: center; }
+  .finale-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; pointer-events: auto; }
+  .nom-geant { position: absolute; left: 0; right: 0; bottom: 0.02em; margin: 0; display: flex; justify-content: center; font: 800 clamp(64px, 18vw, 320px)/0.9 var(--titres); letter-spacing: -0.05em; white-space: nowrap; pointer-events: none; }
+  .nom-geant span { display: inline-block; background: linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,0) 88%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    --q: clamp(0, var(--n, 1) * 1.8 - var(--i) * 0.08, 1); transform: translateY(calc((1 - var(--q)) * 110%)) rotate(calc((1 - var(--q)) * 9deg)); opacity: var(--q); filter: blur(calc((1 - var(--q)) * 8px)); }
+</style>

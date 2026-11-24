@@ -1,0 +1,41 @@
+---
+// Un document (confidentialité, conditions) : sommaire collant à gauche,
+// texte à droite, la section lue s'allume dans le sommaire.
+interface Props { titre: string; misAJour: string; sections: { id: string; titre: string }[] }
+const { titre, misAJour, sections } = Astro.props;
+---
+<section class="surtitre-page">
+  <div class="conteneur">
+    <h1 class="titre-1 apparait">{titre}</h1>
+    <p class="maj apparait" style="--d:1">Mise à jour le {misAJour}</p>
+  </div>
+</section>
+<section class="doc conteneur">
+  <nav class="sommaire" aria-label="Sommaire">
+    {sections.map((s) => <a href={`#${s.id}`} data-lien={s.id}>{s.titre}</a>)}
+  </nav>
+  <article class="corps-doc"><slot /></article>
+</section>
+
+<script>
+  const liens = document.querySelectorAll<HTMLAnchorElement>('.sommaire a');
+  const obs = new IntersectionObserver((e) => {
+    for (const x of e) if (x.isIntersecting) liens.forEach((l) => l.classList.toggle('actif', l.dataset.lien === x.target.id));
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  document.querySelectorAll('.corps-doc section[id]').forEach((s) => obs.observe(s));
+</script>
+
+<style>
+  .maj { margin: 16px 0 0; color: var(--argent-3); font-size: 14px; }
+  .doc { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 64px; padding-bottom: 160px; }
+  @media (max-width: 860px) { .doc { grid-template-columns: 1fr; } .sommaire { display: none !important; } }
+  .sommaire { position: sticky; top: 96px; align-self: start; display: flex; flex-direction: column; gap: 4px; border-left: 1px solid var(--trait); }
+  .sommaire a { color: var(--argent-3); text-decoration: none; font-size: 14px; padding: 6px 0 6px 16px; margin-left: -1px; border-left: 1px solid transparent; transition: color 300ms, border-color 300ms; }
+  .sommaire a.actif { color: var(--argent); border-left-color: var(--argent); }
+  .corps-doc { max-width: 68ch; }
+  .corps-doc :global(section) { padding-bottom: 40px; scroll-margin-top: 90px; }
+  .corps-doc :global(h2) { font: 700 26px/1.2 var(--titres); letter-spacing: -0.02em; margin: 0 0 16px; color: #fff; }
+  .corps-doc :global(p), .corps-doc :global(li) { color: var(--argent-2); line-height: 1.65; }
+  .corps-doc :global(strong) { color: var(--argent); }
+  .corps-doc :global(a) { color: var(--argent); }
+</style>

@@ -10,9 +10,7 @@
 // Rien d'inventé : chaque phrase décrit ce que l'app fait aujourd'hui.
 // Sans JavaScript ou avec « réduire les animations », tout s'affiche à l'état final.
 // ============================================================================
-import '@fontsource-variable/inter-tight';
-import '@fontsource-variable/inter';
-import '../styles/global.css';
+import Page from '../layouts/Page.astro';
 import Logo from '../components/Logo.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -31,40 +29,9 @@ for (let y = 0; y < 21; y++) for (let x = 0; x < 21; x++) {
 }
 const coins = [[0, 0], [14, 0], [0, 14]];
 const motSecurite = 'Votre clé ne quitte jamais ce téléphone.'.split(' ');
-const nom = 'DROPLET ID'.split('');
 ---
-<!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>{titre}</title>
-  <meta name="description" content={description} />
-  <meta name="theme-color" content="#050506" />
-  <link rel="icon" href={`${base}/logo.svg`} type="image/svg+xml" />
-  <meta property="og:title" content={titre} />
-  <meta property="og:description" content={description} />
-  <meta property="og:type" content="website" />
-</head>
-<body>
+<Page titre="Droplet ID — votre identité, bouclée." description={description}>
 
-<header class="nav">
-  <div class="conteneur nav-ligne">
-    <a class="marque" href="#haut" aria-label="Droplet ID, haut de page">
-      <img src={`${base}/logo.svg`} alt="" width="28" height="28" />
-      <span>Droplet ID</span>
-    </a>
-    <nav aria-label="Sections">
-      <a href="#fonctionnement">Fonctionnement</a>
-      <a href="#securite">Sécurité</a>
-      <a href="#apps">Apps</a>
-    </nav>
-    <a class="nav-action" href={APK}>Télécharger</a>
-  </div>
-  <div class="progression" aria-hidden="true"></div>
-</header>
-
-<main id="haut">
 
   <!-- 1. LA CEINTURE SE BOUCLE. -->
   <section class="scene scene-hero" data-scene="epingle" id="hero">
@@ -158,7 +125,7 @@ const nom = 'DROPLET ID'.split('');
     <div class="conteneur">
       <div class="centre">
         <h2 class="titre-2 mots" aria-label="Votre clé ne quitte jamais ce téléphone.">
-          {motSecurite.map((m, i) => <span aria-hidden="true" style={`--i:${i}`}>{m} </span>)}
+          {motSecurite.map((m, i) => <span aria-hidden="true" style={`--i:${i}`}>{m + ' '}</span>)}
         </h2>
         <p class="chapeau centre-texte">Droplet ID crée une clé sur votre téléphone. Personne d'autre ne la possède, pas même Droplet.</p>
       </div>
@@ -225,146 +192,48 @@ const nom = 'DROPLET ID'.split('');
     </div>
   </section>
 
-  <!-- 6. FIN : le nom monte, la ceinture se reboucle. -->
-  <section class="scene scene-fin" data-scene="epingle">
-    <div class="epingle fin">
-      <div class="lumiere" aria-hidden="true"></div>
-      <div class="fin-contenu">
-        <div class="fin-logo boite-logo"><Logo id="fin" taille={150} /></div>
-        <h2 class="titre-2 fin-titre">Bouclez votre identité.</h2>
-        <p class="chapeau centre-texte fin-chapeau">Gratuit. Pour Android 12 ou plus récent.</p>
-        <div class="actions fin-actions">
-          <a class="bouton bouton-metal" href={APK}>Télécharger pour Android</a>
-          <a class="bouton bouton-contour" href={SOURCES}>Voir le code source</a>
-        </div>
-      </div>
-      <p class="nom-geant" aria-hidden="true">{nom.map((l, i) => <span style={`--i:${i}`}>{l === ' ' ? ' ' : l}</span>)}</p>
-    </div>
-  </section>
-</main>
-
-<footer class="pied">
-  <div class="conteneur pied-ligne">
-    <span>© 2026 Droplet</span>
-    <a href={SOURCES}>Code source</a>
-    <span class="pied-note">Droplet ID est en test. Il n'est pas encore sur le Play Store.</span>
-  </div>
-</footer>
+</Page>
 
 <script>
-  import Lenis from 'lenis';
-
-  const calme = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  document.documentElement.classList.toggle('anime', !calme);
-
-  // Un défilement doux, avec de l'inertie (sauf si l'on demande moins d'animations).
-  const lenis = calme ? null : new Lenis({ lerp: 0.09, smoothWheel: true });
-  document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
-    const cible = document.querySelector(a.getAttribute('href')!);
-    if (cible && lenis) { e.preventDefault(); lenis.scrollTo(cible as HTMLElement, { offset: 0 }); }
-  }));
-
-  const borne = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-  const plage = (p: number, a: number, b: number) => borne((p - a) / (b - a));
-  const scenes = [...document.querySelectorAll<HTMLElement>('[data-scene]')];
-  const barre = document.querySelector<HTMLElement>('.progression')!;
-
-  // Le clic de la ceinture, joué une fois à chaque fois qu'elle se boucle.
-  const clics = new Map<Element, boolean>();
-  function boucler(logo: SVGElement | null, t: number) {
-    if (!logo) return;
-    logo.style.setProperty('--boucle', String(t));
-    const ferme = t >= 0.999;
-    if (ferme && !clics.get(logo)) {
-      logo.classList.remove('clic'); void logo.getBoundingClientRect(); logo.classList.add('clic');
-      navigator.vibrate?.(12);
-    }
-    clics.set(logo, ferme);
-  }
+  import { surScene, boucler, plage } from '../scripts/moteur';
 
   // Le logo du héros suit un peu le pointeur, en 3D.
   const cadre = document.querySelector<HTMLElement>('.hero-logo-cadre');
-  window.addEventListener('pointermove', (e) => {
-    if (calme || !cadre) return;
-    const x = e.clientX / innerWidth - 0.5, y = e.clientY / innerHeight - 0.5;
-    cadre.style.setProperty('--rx', `${(-y * 10).toFixed(2)}deg`);
-    cadre.style.setProperty('--ry', `${(x * 14).toFixed(2)}deg`);
-    const fin = document.querySelector<HTMLElement>('.fin');
-    fin?.style.setProperty('--mx', `${e.clientX}px`);
-    fin?.style.setProperty('--my', `${e.clientY}px`);
+  addEventListener('pointermove', (e) => {
+    if (!cadre || document.documentElement.classList.contains('anime') === false) return;
+    cadre.style.setProperty('--rx', `${((0.5 - e.clientY / innerHeight) * 10).toFixed(2)}deg`);
+    cadre.style.setProperty('--ry', `${((e.clientX / innerWidth - 0.5) * 14).toFixed(2)}deg`);
   }, { passive: true });
 
-  function image(temps: number) {
-    lenis?.raf(temps);
-    const vh = innerHeight;
-    barre.style.transform = `scaleX(${borne(scrollY / (document.documentElement.scrollHeight - vh))})`;
-    for (const s of scenes) {
-      const r = s.getBoundingClientRect();
-      if (r.bottom < -vh || r.top > 2 * vh) continue;
-      const p = s.dataset.scene === 'epingle'
-        ? borne(-r.top / Math.max(1, r.height - vh))
-        : borne((vh - r.top) / (vh + r.height));
-      s.style.setProperty('--p', p.toFixed(4));
-
-      if (s.id === 'hero') {
-        boucler(s.querySelector('svg.logo'), calme ? 1 : plage(p, 0.08, 0.5));
-        s.style.setProperty('--b', plage(p, 0.48, 0.66).toFixed(4));   // « Bouclée. »
-        s.style.setProperty('--s', plage(p, 0.62, 0.8).toFixed(4));    // chapeau + boutons
-        s.style.setProperty('--o', plage(p, 0.9, 1).toFixed(4));       // sortie
-      }
-      if (s.id === 'fonctionnement') {
-        const etape = Math.min(2, Math.floor(plage(p, 0.05, 0.95) * 3));
-        s.querySelectorAll<HTMLElement>('[data-etape]').forEach((el) => el.classList.toggle('active', Number(el.dataset.etape) <= etape));
-        s.querySelectorAll<HTMLElement>('[data-vue]').forEach((el) => el.classList.toggle('active', Number(el.dataset.vue) === etape));
-        s.style.setProperty('--e', plage(p, 0.05, 0.95).toFixed(4));
-      }
-      if (s.classList.contains('scene-retirer')) {
-        s.style.setProperty('--r', plage(p, 0.35, 0.7).toFixed(4));
-      }
-      if (s.classList.contains('scene-fin')) {
-        boucler(s.querySelector('svg.logo'), calme ? 1 : plage(p, 0.25, 0.6));
-        s.style.setProperty('--n', plage(p, 0.05, 0.75).toFixed(4));
-        s.style.setProperty('--c', plage(p, 0.55, 0.85).toFixed(4));
-      }
-    }
-    requestAnimationFrame(image);
-  }
-  requestAnimationFrame(image);
+  surScene(document.getElementById('hero'), (p, s) => {
+    boucler(s.querySelector('svg.logo'), plage(p, 0.08, 0.5));
+    s.style.setProperty('--b', plage(p, 0.48, 0.66).toFixed(4));
+    s.style.setProperty('--s', plage(p, 0.62, 0.8).toFixed(4));
+    s.style.setProperty('--o', plage(p, 0.9, 1).toFixed(4));
+  });
+  surScene(document.getElementById('fonctionnement'), (p, s) => {
+    const etape = Math.min(2, Math.floor(plage(p, 0.05, 0.95) * 3));
+    s.querySelectorAll<HTMLElement>('[data-etape]').forEach((el) => el.classList.toggle('active', Number(el.dataset.etape) <= etape));
+    s.querySelectorAll<HTMLElement>('[data-vue]').forEach((el) => el.classList.toggle('active', Number(el.dataset.vue) === etape));
+    s.style.setProperty('--e', plage(p, 0.05, 0.95).toFixed(4));
+  });
+  surScene(document.querySelector('.scene-retirer'), (p, s) => s.style.setProperty('--r', plage(p, 0.35, 0.7).toFixed(4)));
 </script>
 
 <style>
-  /* ---------- Barre de navigation ---------- */
-  .nav { position: sticky; top: 0; z-index: 20; background: rgba(5,5,6,.72); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); border-bottom: 1px solid var(--trait); }
-  .nav-ligne { display: flex; align-items: center; gap: 24px; height: 56px; }
-  .marque { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 600 16px/1 var(--titres); letter-spacing: -0.01em; }
-  .marque img { border-radius: 8px; }
-  .nav nav { display: flex; gap: 22px; margin-left: auto; }
-  .nav nav a { color: var(--argent-2); text-decoration: none; font-size: 14px; }
-  .nav nav a:hover { color: var(--argent); }
-  .nav-action { font-size: 14px; font-weight: 600; text-decoration: none; padding: 8px 14px; border-radius: 999px; background: var(--metal); color: #0e0f12; }
-  .progression { position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: linear-gradient(90deg, #8e939a, #fff); transform-origin: left; transform: scaleX(0); }
-  @media (max-width: 640px) { .nav nav { display: none; } .nav-action { margin-left: auto; } }
-
   /* ---------- Scènes épinglées : la section est haute, son contenu reste à l'écran ---------- */
-  .scene { position: relative; }
-  .epingle { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-  html:not(.anime) .scene { height: auto !important; }
-  html:not(.anime) .epingle { position: relative; height: auto; padding: 120px 0; }
 
   /* ---------- 1. Héros ---------- */
   .scene-hero { height: 260vh; }
   .halo { position: absolute; left: 50%; top: 50%; width: 1100px; height: 1100px; transform: translate(-50%, -50%) scale(calc(0.8 + var(--b, 1) * 0.3)); background: radial-gradient(closest-side, rgba(200,204,212,calc(0.06 + var(--b, 1) * 0.1)), transparent 70%); pointer-events: none; }
   .hero-scene { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 22px; padding: 0 20px; opacity: calc(1 - var(--o, 0)); transform: translateY(calc(var(--o, 0) * -60px)); }
   .hero-logo-cadre { perspective: 900px; }
-  .boite-logo { border-radius: 30%; overflow: hidden; }
-  .boite-logo :global(svg) { width: 100%; height: 100%; }
   .hero-logo { width: clamp(150px, min(34vw, 30vh), 300px); aspect-ratio: 1; box-shadow: 0 50px 120px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.08);
     transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(calc(1.18 - var(--s, 1) * 0.32)); transition: transform 600ms var(--courbe); }
   .hero-titre { display: flex; flex-direction: column; align-items: center; }
   .ligne-b { opacity: var(--b, 1); filter: blur(calc((1 - var(--b, 1)) * 14px)); transform: translateY(calc((1 - var(--b, 1)) * 24px)); }
   .hero-chapeau { text-align: center; opacity: var(--s, 1); transform: translateY(calc((1 - var(--s, 1)) * 20px)); }
   .hero-actions { opacity: var(--s, 1); transform: translateY(calc((1 - var(--s, 1)) * 20px)); pointer-events: auto; }
-  .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
   .indice { position: absolute; bottom: 28px; left: 0; right: 0; margin: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 12px; color: var(--argent-3); letter-spacing: .02em; opacity: calc(1 - var(--s, 1)); }
   .indice span { width: 1px; height: 36px; background: linear-gradient(transparent, var(--argent-2)); animation: indice 1.8s var(--courbe) infinite; transform-origin: top; }
   @keyframes indice { 0% { transform: scaleY(0); } 60% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
@@ -435,12 +304,7 @@ const nom = 'DROPLET ID'.split('');
   }
 
   /* ---------- 3. Sécurité : le titre s'allume mot à mot ---------- */
-  .bloc { padding: clamp(96px, 14vw, 180px) 0; }
-  .bloc-sombre { background: var(--noir-2); border-block: 1px solid var(--trait); }
-  .centre { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; }
-  .centre-texte { text-align: center; margin-inline: auto; }
-  .mots { max-width: 16ch; background: none; color: var(--argent); -webkit-text-fill-color: currentColor; }
-  .mots span { opacity: calc(0.14 + 0.86 * clamp(0, (var(--p, 1) - 0.12) * 22 - var(--i), 1)); transition: opacity 200ms linear; }
+  .mots { max-width: 16ch; }
   .grille { margin-top: 64px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; perspective: 1400px; }
   @media (max-width: 980px) { .grille { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 560px) { .grille { grid-template-columns: 1fr; } }
@@ -476,24 +340,4 @@ const nom = 'DROPLET ID'.split('');
   .retire-msg { margin: 6px 0 0; text-align: center; font-size: 14px; color: var(--argent-2); opacity: clamp(0, (var(--r, 1) - 0.7) * 4, 1); }
   html:not(.anime) .acces-retire { display: none; }
 
-  /* ---------- 6. Fin ---------- */
-  .scene-fin { height: 230vh; }
-  .fin { flex-direction: column; background: var(--noir); }
-  .lumiere { position: absolute; inset: 0; background: radial-gradient(600px circle at var(--mx, 50%) var(--my, 40%), rgba(200,204,212,.09), transparent 60%); pointer-events: none; }
-  .fin-contenu { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; padding: 0 20px; margin-bottom: 6vh; }
-  .fin-logo { box-shadow: 0 24px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.08); width: clamp(96px, 16vh, 150px); aspect-ratio: 1;
-    transform: translateY(calc((1 - var(--n, 1)) * 80px)) scale(calc(0.85 + var(--n, 1) * 0.15)); opacity: clamp(0, var(--n, 1) * 3, 1); }
-  .fin-titre, .fin-chapeau, .fin-actions { opacity: var(--c, 1); transform: translateY(calc((1 - var(--c, 1)) * 30px)); }
-  .nom-geant { position: absolute; left: 0; right: 0; bottom: 0.04em; margin: 0; display: flex; justify-content: center; font: 800 clamp(64px, 17.5vw, 300px)/0.9 var(--titres); letter-spacing: -0.05em; white-space: nowrap; pointer-events: none; }
-  .nom-geant span { display: inline-block; background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0) 85%); -webkit-background-clip: text; background-clip: text; color: transparent;
-    --q: clamp(0, var(--n, 1) * 1.7 - var(--i) * 0.07, 1); transform: translateY(calc((1 - var(--q)) * 110%)) rotate(calc((1 - var(--q)) * 8deg)); opacity: var(--q); }
-
-  .pied { border-top: 1px solid var(--trait); padding: 28px 0 40px; font-size: 13px; color: var(--argent-3); background: var(--noir); position: relative; z-index: 2; }
-  .pied-ligne { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; }
-  .pied a { color: var(--argent-2); text-decoration: none; }
-  .pied a:hover { color: var(--argent); }
-  .pied-note { margin-left: auto; }
-  @media (max-width: 640px) { .pied-note { margin-left: 0; } }
 </style>
-</body>
-</html>

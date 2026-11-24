@@ -1,0 +1,25 @@
+---
+import Page from '../layouts/Page.astro';
+import Document from '../components/Document.astro';
+import { SIGNALER } from '../site';
+const sections = [
+  { id: 'resume', titre: 'En bref' },
+  { id: 'telephone', titre: 'Sur votre téléphone' },
+  { id: 'serveur', titre: 'Sur le serveur' },
+  { id: 'apps', titre: 'Ce que reçoivent les apps' },
+  { id: 'jamais', titre: 'Ce qui n\'est jamais collecté' },
+  { id: 'effacer', titre: 'Tout effacer' },
+  { id: 'contact', titre: 'Nous écrire' },
+];
+---
+<Page titre="Confidentialité" description="Ce que Droplet ID garde, où, et ce qu'il ne collecte jamais." finale={false}>
+  <Document titre="Confidentialité." misAJour="24 novembre 2026" sections={sections}>
+    <section id="resume"><h2>En bref</h2><p>Droplet ID ne vous demande ni numéro, ni e-mail, ni nom. Il garde le strict nécessaire pour vérifier que c'est bien vous qui approuvez une connexion. Il n'y a ni publicité, ni mesure d'audience.</p></section>
+    <section id="telephone"><h2>Sur votre téléphone</h2><ul><li><strong>La clé de l'appareil</strong>, qui signe vos approbations. Elle ne quitte jamais le téléphone.</li><li><strong>Les identifiants de votre compte et de votre appareil.</strong></li><li><strong>Vos préférences</strong>, comme l'apparence.</li></ul><p>Tout est chiffré et exclu des sauvegardes Android.</p></section>
+    <section id="serveur"><h2>Sur le serveur</h2><ul><li><strong>La partie publique de la clé</strong> de votre téléphone, pour vérifier vos signatures.</li><li><strong>Le modèle de l'appareil</strong>, par exemple « Pixel 8 ».</li><li><strong>La liste des apps que vous avez autorisées</strong>, avec la date, et le pseudo que vous leur avez donné s'il y en a un.</li></ul></section>
+    <section id="apps"><h2>Ce que reçoivent les apps</h2><p>Chaque app reçoit un identifiant calculé pour elle seule. Deux apps ne peuvent pas savoir qu'il s'agit de la même personne. Votre pseudo n'est envoyé que si vous acceptez, au moment de vous connecter, et seulement à cette app.</p></section>
+    <section id="jamais"><h2>Ce qui n'est jamais collecté</h2><p>Votre numéro, votre e-mail, votre nom, vos contacts, vos messages, votre position et vos données biométriques. L'empreinte et le visage sont vérifiés par Android ; Droplet ID ne reçoit qu'un « oui » ou un « non ».</p></section>
+    <section id="effacer"><h2>Tout effacer</h2><p>Dans l'app, « Oublier ce téléphone » efface la clé et retire l'appareil de votre compte. Vous pouvez aussi retirer l'accès d'une seule app à tout moment.</p></section>
+    <section id="contact"><h2>Nous écrire</h2><p>Pour toute question sur vos données, ouvrez un ticket sur <a href={SIGNALER}>la page GitHub du projet</a>. Ce texte décrit la version de test actuelle ; il sera complété avant la publication sur le Play Store.</p></section>
+  </Document>
+</Page>

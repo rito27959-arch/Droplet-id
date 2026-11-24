@@ -1,0 +1,81 @@
+---
+// DÉVELOPPEURS — « Se connecter avec Droplet ID », en quatre échanges.
+// L'accès pour les apps hors de la famille Droplet n'est pas encore ouvert.
+import Page from '../layouts/Page.astro';
+import { SIGNALER } from '../site';
+const titre = ['Se', 'connecter', 'avec', 'Droplet', 'ID.'];
+---
+<Page titre="Développeurs" description="Comment une app utilise Droplet ID pour reconnaître ses utilisateurs, sans mot de passe ni donnée personnelle." courant="developpeurs">
+  <section class="surtitre-page" data-scene="vue">
+    <div class="conteneur centre">
+      <p class="sur apparait">Développeurs</p>
+      <h1 class="titre-1 mots grand-mots" aria-label="Se connecter avec Droplet ID.">
+        {titre.map((m, i) => <span aria-hidden="true" style={`--i:${i}`}>{m + ' '}</span>)}
+      </h1>
+      <p class="chapeau centre-texte apparait" style="--d:2">Votre app ne gère plus de mots de passe. Elle reçoit un identifiant stable, propre à elle, et rien d'autre sans l'accord de la personne.</p>
+    </div>
+  </section>
+
+  <section class="scene flux-scene" data-scene="epingle" id="flux">
+    <div class="epingle">
+      <div class="conteneur flux">
+        <h2 class="titre-3 flux-titre">Quatre échanges, de la demande à l'identifiant.</h2>
+        <div class="acteurs" aria-hidden="true">
+          <span>Votre app</span><span>Serveur Droplet ID</span><span>Téléphone</span>
+        </div>
+        <ol class="messages">
+          <li class="m m1" style="--i:0"><b>1</b><span>Votre app ouvre une demande de connexion</span></li>
+          <li class="m m2" style="--i:1"><b>2</b><span>Elle affiche le QR et le nombre reçus</span></li>
+          <li class="m m3" style="--i:2"><b>3</b><span>La personne scanne, vérifie le nombre, approuve : le téléphone signe</span></li>
+          <li class="m m4" style="--i:3"><b>4</b><span>Votre app reçoit l'identifiant propre à elle (et le pseudo, si la personne le partage)</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloc bloc-sombre">
+    <div class="conteneur grille-dev">
+      <article class="apparait"><h3 class="titre-3">Un identifiant par app</h3><p class="texte">Deux apps reçoivent deux identifiants différents pour la même personne. Elles ne peuvent pas recouper leurs utilisateurs.</p></article>
+      <article class="apparait" style="--d:1"><h3 class="titre-3">Pas de mot de passe à stocker</h3><p class="texte">Rien à hacher, rien à réinitialiser, rien à fuiter. La preuve, c'est la signature du téléphone, vérifiée par Droplet ID.</p></article>
+      <article class="apparait" style="--d:2"><h3 class="titre-3">Un nom de domaine vérifié</h3><p class="texte">La personne voit le nom et le domaine de votre app avant d'approuver. Une app qui en imite une autre est reconnaissable.</p></article>
+    </div>
+  </section>
+
+  <section class="bloc">
+    <div class="conteneur centre apparait">
+      <h2 class="titre-2">Bientôt ouvert à vos apps.</h2>
+      <p class="chapeau centre-texte">Aujourd'hui, seules les apps de la famille Droplet utilisent Droplet ID. Une documentation et un SDK pour les autres apps sont prévus. Dites-nous ce que vous voulez construire.</p>
+      <div class="actions"><a class="bouton bouton-metal" href={SIGNALER}>Écrire à l'équipe sur GitHub</a></div>
+    </div>
+  </section>
+</Page>
+
+<script>
+  import { surScene, plage } from '../scripts/moteur';
+  surScene(document.getElementById('flux'), (p, s) => s.style.setProperty('--f', String(plage(p, 0.05, 0.85))));
+</script>
+
+<style>
+  .sur { margin: 0; font-size: 14px; font-weight: 600; color: var(--argent-2); letter-spacing: .02em; }
+  .grand-mots { max-width: 12ch; }
+  .flux-scene { height: 300vh; }
+  .flux { display: flex; flex-direction: column; gap: 28px; }
+  .flux-titre { text-align: center; }
+  .acteurs { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; font-weight: 600; font-size: 15px; position: relative; }
+  .acteurs span { padding: 12px; border: 1px solid var(--trait); border-radius: 14px; background: var(--graphite); margin: 0 8px; }
+  .messages { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; position: relative; }
+  .messages::before { content: ''; position: absolute; left: calc(100% / 6); right: calc(100% / 6); top: -14px; bottom: 0; background:
+    linear-gradient(var(--trait), var(--trait)) 0 0 / 1px 100% no-repeat, linear-gradient(var(--trait), var(--trait)) 50% 0 / 1px 100% no-repeat, linear-gradient(var(--trait), var(--trait)) 100% 0 / 1px 100% no-repeat; }
+  .m { position: relative; display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 16px; background: linear-gradient(180deg, #1d1e23, #15161a); border: 1px solid var(--trait); font-size: 15px;
+    --q: clamp(0, var(--f, 1) * 4.4 - var(--i), 1); opacity: var(--q); }
+  .m b { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--metal); color: #0e0f12; font-size: 13px; }
+  .m1 { width: 50%; margin-left: calc(100% / 6); transform: translateX(calc((1 - var(--q)) * -40px)); }
+  .m2 { width: 50%; margin-left: calc(100% / 6); transform: translateX(calc((1 - var(--q)) * 40px)); }
+  .m3 { width: 50%; margin-left: calc(100% / 3); transform: translateX(calc((1 - var(--q)) * 40px)); }
+  .m4 { width: 50%; margin-left: calc(100% / 6); transform: translateX(calc((1 - var(--q)) * -40px)); }
+  .m4 { border-color: rgba(255,255,255,.3); }
+  @media (max-width: 700px) { .m1, .m2, .m3, .m4 { width: 100%; margin-left: 0; } .acteurs { font-size: 12px; } .messages::before { display: none; } }
+  .grille-dev { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 860px) { .grille-dev { grid-template-columns: 1fr; } }
+  .grille-dev article { background: var(--graphite); border: 1px solid var(--trait); border-radius: 24px; padding: 28px 24px; display: flex; flex-direction: column; gap: 12px; }
+</style>

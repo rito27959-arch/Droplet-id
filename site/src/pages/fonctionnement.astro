@@ -1,0 +1,140 @@
+---
+// FONCTIONNEMENT — quatre gestes, sur un rail horizontal qui défile avec la page.
+import Page from '../layouts/Page.astro';
+import { lien } from '../site';
+const titre = ['Quatre', 'gestes.', 'Aucun', 'mot', 'de', 'passe.'];
+---
+<Page titre="Fonctionnement" description="Créer son identité, se connecter à une app, revenir, garder la main : Droplet ID en quatre gestes." courant="fonctionnement">
+  <section class="surtitre-page" data-scene="vue">
+    <div class="conteneur centre">
+      <p class="sur apparait">Fonctionnement</p>
+      <h1 class="titre-1 mots grand-mots" aria-label="Quatre gestes. Aucun mot de passe.">
+        {titre.map((m, i) => <span aria-hidden="true" style={`--i:${i}`}>{m + ' '}</span>)}
+      </h1>
+      <p class="chapeau centre-texte apparait" style="--d:2">Droplet ID remplace l'identifiant et le mot de passe par une clé qui reste dans votre téléphone. Voici tout ce que vous aurez à faire.</p>
+    </div>
+  </section>
+
+  <section class="scene rail-scene" data-scene="epingle" id="rail">
+    <div class="epingle">
+      <div class="rail">
+        <article class="panneau">
+          <span class="grand-num" aria-hidden="true">01</span>
+          <div class="panneau-texte">
+            <h2 class="titre-2">Créez votre identité.</h2>
+            <p class="chapeau">Un pseudo, et c'est tout. Le téléphone crée une clé que personne d'autre ne possède. Ni numéro, ni e-mail, ni nom.</p>
+          </div>
+          <div class="maquette maquette-cle" aria-hidden="true">
+            <div class="cle-anneau"></div><div class="cle-anneau r2"></div><div class="cle-anneau r3"></div>
+            <svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/></svg>
+            <span>Clé créée sur ce téléphone</span>
+          </div>
+        </article>
+        <article class="panneau">
+          <span class="grand-num" aria-hidden="true">02</span>
+          <div class="panneau-texte">
+            <h2 class="titre-2">Scannez, vérifiez, approuvez.</h2>
+            <p class="chapeau">Une app vous montre un code. Vous le scannez, vous recopiez le nombre qu'elle affiche, puis votre empreinte confirme.</p>
+          </div>
+          <div class="maquette maquette-code" aria-hidden="true">
+            <span class="code-aide">Le nombre affiché sur l'app</span>
+            <span class="code-grand">482 913</span>
+            <span class="code-ok">Empreinte reconnue</span>
+          </div>
+        </article>
+        <article class="panneau">
+          <span class="grand-num" aria-hidden="true">03</span>
+          <div class="panneau-texte">
+            <h2 class="titre-2">Revenez à l'app.</h2>
+            <p class="chapeau">Droplet ID vous rend la main tout seul. L'app vous reconnaît avec un identifiant qui ne vaut que pour elle.</p>
+          </div>
+          <div class="maquette maquette-retour" aria-hidden="true">
+            <img src={lien('/apps/kunfox.webp')} alt="" width="72" height="72" />
+            <span class="fleche"></span>
+            <span class="retour-texte">Connecté à Kunfox</span>
+          </div>
+        </article>
+        <article class="panneau">
+          <span class="grand-num" aria-hidden="true">04</span>
+          <div class="panneau-texte">
+            <h2 class="titre-2">Gardez la main.</h2>
+            <p class="chapeau">Chaque app connectée est listée, avec sa date et ce qu'elle reçoit. Vous la retirez quand vous voulez.</p>
+          </div>
+          <div class="maquette maquette-liste" aria-hidden="true">
+            <div><img src={lien('/apps/messenger.webp')} alt="" width="36" height="36" /><span>Droplet Messenger</span></div>
+            <div><img src={lien('/apps/drop.webp')} alt="" width="36" height="36" /><span>Droplet Drop</span></div>
+            <div><img src={lien('/apps/kunfox.webp')} alt="" width="36" height="36" /><span>Kunfox</span><b>Retirer</b></div>
+          </div>
+        </article>
+      </div>
+      <div class="rail-repere" aria-hidden="true"><span></span></div>
+    </div>
+  </section>
+
+  <section class="bloc bloc-sombre">
+    <div class="conteneur compare">
+      <div class="apparait">
+        <h2 class="titre-2">Ce que l'app reçoit.</h2>
+        <ul class="liste-oui">
+          <li>Un identifiant calculé pour elle seule</li>
+          <li>Votre pseudo, si vous acceptez de le partager</li>
+        </ul>
+      </div>
+      <div class="apparait" style="--d:2">
+        <h2 class="titre-2">Ce qu'elle ne voit jamais.</h2>
+        <ul class="liste-non">
+          <li>Votre clé</li>
+          <li>Votre numéro, votre e-mail, votre nom</li>
+          <li>Les autres apps que vous utilisez</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</Page>
+
+<script>
+  import { surScene } from '../scripts/moteur';
+  surScene(document.getElementById('rail'), (p, s) => s.style.setProperty('--r', String(p)));
+</script>
+
+<style>
+  .sur { margin: 0; font-size: 14px; font-weight: 600; color: var(--argent-2); letter-spacing: .02em; }
+  .grand-mots { max-width: 12ch; }
+  .rail-scene { height: 420vh; }
+  .rail { display: flex; height: 100%; width: 400vw; transform: translateX(calc(var(--r, 0) * -300vw)); will-change: transform; }
+  html:not(.anime) .rail { flex-direction: column; width: auto; transform: none; }
+  .panneau { position: relative; width: 100vw; height: 100%; flex: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 6vw; padding: 0 max(20px, calc((100vw - 1120px) / 2)); }
+  @media (max-width: 860px) { .panneau { grid-template-columns: 1fr; align-content: center; gap: 36px; } }
+  .grand-num { position: absolute; right: 4vw; top: 50%; transform: translateY(-50%); font: 800 clamp(160px, 34vw, 520px)/1 var(--titres); letter-spacing: -0.06em; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,.07); pointer-events: none; }
+  .panneau-texte { position: relative; display: flex; flex-direction: column; gap: 20px; }
+  .maquette { position: relative; justify-self: center; width: min(380px, 80vw); aspect-ratio: 1; border-radius: 40px; background: linear-gradient(180deg, #1d1e23, #111215); border: 1px solid var(--trait); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; overflow: hidden; }
+  .maquette svg { width: 72px; height: 72px; fill: none; stroke: #fff; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .maquette span { color: var(--argent-2); font-size: 14px; }
+  .cle-anneau { position: absolute; width: 140px; height: 140px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18); animation: onde 3s var(--courbe) infinite; }
+  .cle-anneau.r2 { animation-delay: 1s; } .cle-anneau.r3 { animation-delay: 2s; }
+  @keyframes onde { from { transform: scale(.6); opacity: 1; } to { transform: scale(2.2); opacity: 0; } }
+  .maquette-cle svg, .maquette-cle span { position: relative; }
+  .maquette-cle span { position: absolute; bottom: 36px; }
+  .code-grand { font: 700 54px/1 var(--titres) !important; color: #fff !important; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+  .code-ok { display: inline-flex; gap: 8px; align-items: center; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,.06); }
+  .code-ok::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+  .maquette-retour { flex-direction: row; gap: 20px; flex-wrap: wrap; }
+  .maquette-retour img { border-radius: 18px; }
+  .fleche { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, #fff); position: relative; }
+  .fleche::after { content: ''; position: absolute; right: 0; top: -4px; border: 4px solid transparent; border-left-color: #fff; }
+  .retour-texte { width: 100%; text-align: center; color: #fff !important; font-weight: 600; font-size: 16px !important; }
+  .maquette-liste { padding: 24px; gap: 10px; align-items: stretch; }
+  .maquette-liste div { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; background: rgba(255,255,255,.04); }
+  .maquette-liste img { border-radius: 9px; }
+  .maquette-liste span { flex: 1; color: var(--argent) !important; font-weight: 600; }
+  .maquette-liste b { background: var(--rouge); color: #fff; font-size: 12px; padding: 6px 10px; border-radius: 999px; }
+  .rail-repere { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); width: 160px; height: 2px; background: var(--graphite-2); border-radius: 2px; overflow: hidden; }
+  .rail-repere span { display: block; height: 100%; background: #fff; transform-origin: left; transform: scaleX(var(--r, 1)); }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+  @media (max-width: 760px) { .compare { grid-template-columns: 1fr; } }
+  .compare ul { list-style: none; padding: 0; margin: 28px 0 0; display: flex; flex-direction: column; gap: 14px; font-size: 18px; }
+  .compare li { display: flex; gap: 12px; align-items: center; }
+  .liste-oui li::before { content: ''; width: 18px; height: 18px; flex: none; border-radius: 50%; background: var(--metal); }
+  .liste-non li { color: var(--argent-2); }
+  .liste-non li::before { content: ''; width: 18px; height: 2px; flex: none; background: var(--rouge); }
+</style>

@@ -1,0 +1,99 @@
+---
+// ============================================================================
+// LE GABARIT COMMUN — tête, barre de navigation, pied, fin cinématique.
+// Toutes les pages du site passent par lui.
+// ============================================================================
+import '@fontsource-variable/inter-tight';
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+import Finale from '../components/Finale.astro';
+import { APK, SOURCES, lien } from '../site';
+
+interface Props { titre: string; description: string; courant?: string; finale?: boolean }
+const { titre, description, courant = '', finale = true } = Astro.props;
+const pages = [
+  ['fonctionnement', 'Fonctionnement'],
+  ['securite', 'Sécurité'],
+  ['developpeurs', 'Développeurs'],
+  ['aide', 'Aide'],
+];
+const titreComplet = titre.includes('Droplet ID') ? titre : `${titre} · Droplet ID`;
+---
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>{titreComplet}</title>
+  <meta name="description" content={description} />
+  <meta name="theme-color" content="#050506" />
+  <link rel="icon" href={lien('/logo.svg')} type="image/svg+xml" />
+  <meta property="og:title" content={titreComplet} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content={new URL(lien('/apercu.png'), Astro.site)} />
+</head>
+<body>
+  <a class="aller-contenu" href="#contenu">Aller au contenu</a>
+  <header class="nav">
+    <div class="conteneur nav-ligne">
+      <a class="marque" href={lien('/')} aria-label="Droplet ID, accueil">
+        <img src={lien('/logo.svg')} alt="" width="28" height="28" />
+        <span>Droplet ID</span>
+      </a>
+      <nav aria-label="Pages">
+        {pages.map(([p, t]) => <a href={lien(`/${p}/`)} aria-current={courant === p ? 'page' : undefined}>{t}</a>)}
+      </nav>
+      <a class="nav-action" href={lien('/telecharger/')}>Télécharger</a>
+    </div>
+    <div class="progression" aria-hidden="true"></div>
+  </header>
+
+  <main id="contenu">
+    <slot />
+    {finale && <Finale />}
+  </main>
+
+  <footer class="pied">
+    <div class="conteneur pied-grille">
+      <div class="pied-marque">
+        <img src={lien('/logo.svg')} alt="" width="36" height="36" />
+        <p>Droplet ID est l'identité de la famille Droplet. Il est en test et n'est pas encore sur le Play Store.</p>
+      </div>
+      <div><h2>Découvrir</h2><a href={lien('/fonctionnement/')}>Fonctionnement</a><a href={lien('/securite/')}>Sécurité</a><a href={lien('/telecharger/')}>Télécharger</a></div>
+      <div><h2>Construire</h2><a href={lien('/developpeurs/')}>Développeurs</a><a href={SOURCES}>Code source</a></div>
+      <div><h2>Aide et règles</h2><a href={lien('/aide/')}>Questions fréquentes</a><a href={lien('/confidentialite/')}>Confidentialité</a><a href={lien('/conditions/')}>Conditions</a></div>
+    </div>
+    <div class="conteneur pied-bas"><span>© 2026 Droplet</span><a href={APK}>APK direct</a></div>
+  </footer>
+
+  <script>import '../scripts/moteur';</script>
+</body>
+</html>
+
+<style>
+  .aller-contenu { position: absolute; left: 12px; top: -60px; z-index: 50; background: #fff; color: #000; padding: 10px 14px; border-radius: 10px; }
+  .aller-contenu:focus { top: 12px; }
+  .nav { position: sticky; top: 0; z-index: 30; background: rgba(5,5,6,.72); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); border-bottom: 1px solid var(--trait); view-transition-name: nav; }
+  .nav-ligne { display: flex; align-items: center; gap: 24px; height: 56px; }
+  .marque { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 600 16px/1 var(--titres); letter-spacing: -0.01em; }
+  .marque img { border-radius: 8px; }
+  nav { display: flex; gap: 22px; margin-left: auto; }
+  nav a { color: var(--argent-2); text-decoration: none; font-size: 14px; position: relative; }
+  nav a:hover, nav a[aria-current] { color: var(--argent); }
+  nav a[aria-current]::after { content: ''; position: absolute; left: 0; right: 0; bottom: -19px; height: 1px; background: var(--argent); }
+  .nav-action { font-size: 14px; font-weight: 600; text-decoration: none; padding: 8px 14px; border-radius: 999px; background: var(--metal); color: #0e0f12; }
+  .progression { position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: linear-gradient(90deg, #8e939a, #fff); transform-origin: left; transform: scaleX(0); }
+  @media (max-width: 720px) { nav { display: none; } .nav-action { margin-left: auto; } }
+
+  .pied { border-top: 1px solid var(--trait); padding: 56px 0 40px; font-size: 14px; color: var(--argent-3); background: var(--noir); position: relative; z-index: 2; }
+  .pied-grille { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 32px; }
+  @media (max-width: 760px) { .pied-grille { grid-template-columns: 1fr 1fr; } .pied-marque { grid-column: 1 / -1; } }
+  .pied-marque img { border-radius: 10px; margin-bottom: 14px; }
+  .pied-marque p { margin: 0; max-width: 34ch; color: var(--argent-2); }
+  .pied h2 { font: 600 13px/1 var(--texte); color: var(--argent); margin: 0 0 14px; }
+  .pied-grille > div:not(.pied-marque) { display: flex; flex-direction: column; gap: 10px; }
+  .pied a { color: var(--argent-2); text-decoration: none; }
+  .pied a:hover { color: var(--argent); }
+  .pied-bas { display: flex; gap: 24px; margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--trait); font-size: 13px; }
+</style>

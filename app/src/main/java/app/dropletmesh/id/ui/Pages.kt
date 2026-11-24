@@ -68,10 +68,10 @@ fun LazyListScope.groupe(
 private val zone: ZoneId get() = ZoneId.systemDefault()
 
 fun dateLongue(i: Instant): String =
-    DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(Locale.getDefault()).format(i.atZone(zone))
+    DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(Locale.FRANCE).format(i.atZone(zone))
 
 fun dateHeure(i: Instant): String =
-    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(Locale.getDefault()).format(i.atZone(zone))
+    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(Locale.FRANCE).format(i.atZone(zone))
 
 /** « à l'instant », « il y a 5 min », « il y a 3 h », « il y a 2 j », sinon la date. */
 fun ilYA(i: Instant, maintenant: Instant = Instant.now()): String {

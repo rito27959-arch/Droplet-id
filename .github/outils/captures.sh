@@ -6,6 +6,8 @@ set -u
 mkdir -p captures
 timeout 120 adb install -r app/build/outputs/apk/debug/*x86_64*.apk
 timeout 20 adb shell settings put system screen_off_timeout 1800000
+# Densité d'un vrai téléphone (Pixel : 420 dpi), sinon l'émulateur se comporte comme une tablette.
+timeout 20 adb shell wm density 420
 timeout 20 adb shell input keyevent KEYCODE_WAKEUP
 timeout 20 adb shell wm dismiss-keyguard || true
 # Le journal complet, en continu : on y retrouve un plantage même si l'émulateur s'arrête.

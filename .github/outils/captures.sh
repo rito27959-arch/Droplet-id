@@ -8,6 +8,9 @@ timeout 120 adb install -r app/build/outputs/apk/debug/app-debug.apk
 timeout 20 adb shell settings put system screen_off_timeout 1800000
 timeout 20 adb shell input keyevent KEYCODE_WAKEUP
 timeout 20 adb shell wm dismiss-keyguard || true
+# Le journal complet, en continu : on y retrouve un plantage même si l'émulateur s'arrête.
+adb logcat -c || true
+(adb logcat -v time '*:W' > captures/journal.txt 2>&1 &)
 for ecran in presentation bienvenue accueil accueil-action identite acces acces-vide detail securite compte apparence confidentialite apropos approbation approuvee; do
   for sombre in false true; do
     nom="$ecran-$([ "$sombre" = true ] && echo sombre || echo clair)"
@@ -25,3 +28,4 @@ for ecran in presentation bienvenue accueil accueil-action identite acces acces-
   done
 done
 timeout 30 adb logcat -d -s AndroidRuntime:E > captures/plantages.txt || true
+grep -E 'FATAL|AndroidRuntime|DropletID|glasmio|RuntimeShader|ANR' captures/journal.txt | head -200 > captures/extrait.txt || true

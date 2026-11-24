@@ -4,7 +4,7 @@
 # les autres.
 set -u
 mkdir -p captures
-timeout 120 adb install -r app/build/outputs/apk/debug/app-debug.apk
+timeout 120 adb install -r app/build/outputs/apk/debug/*x86_64*.apk
 timeout 20 adb shell settings put system screen_off_timeout 1800000
 timeout 20 adb shell input keyevent KEYCODE_WAKEUP
 timeout 20 adb shell wm dismiss-keyguard || true

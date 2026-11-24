@@ -1,5 +1,5 @@
 name: Compiler
-# Compile l'app (debug), lance les tests unitaires et publie l'APK de debug
+# Compile l'app (debug et release optimisée), lance les tests et publie les APK
 # comme artefact de l'exécution. Aucune clé de signature n'est utilisée ici.
 on:
   push:
@@ -22,7 +22,10 @@ jobs:
           # Le plugin Android installe la plateforme qui manque (licences acceptées sur les machines GitHub).
       - uses: gradle/actions/setup-gradle@v4
       - name: Compiler et tester
-        run: ./gradlew --no-daemon --stacktrace :core:designsystem:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebug
+        run: ./gradlew --no-daemon --stacktrace :core:designsystem:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebug :app:assembleRelease :app:bundleRelease
+      - name: Tailles
+        run: |
+          ls -la app/build/outputs/apk/debug/ app/build/outputs/apk/release/ app/build/outputs/bundle/release/
       - uses: actions/upload-artifact@v4
         if: success()
         with:
@@ -30,13 +33,16 @@ jobs:
           path: app/build/outputs/apk/debug/*.apk
       # L'APK de debug sur la branche « telechargements » : un lien direct,
       # téléchargeable depuis le téléphone sans compte GitHub.
-      - name: Publier l'APK de debug
+      - name: Publier les APK
         if: success() && github.ref == 'refs/heads/main'
         run: |
-          mkdir -p /tmp/dl && cp app/build/outputs/apk/debug/app-debug.apk /tmp/dl/droplet-id-debug.apk
+          mkdir -p /tmp/dl
+          cp app/build/outputs/apk/debug/*arm64-v8a*.apk /tmp/dl/droplet-id-debug.apk
+          cp app/build/outputs/apk/release/*arm64-v8a*.apk /tmp/dl/droplet-id.apk
+          cp app/build/outputs/apk/release/*armeabi-v7a*.apk /tmp/dl/droplet-id-anciens-telephones.apk
           cd /tmp/dl && git init -q && git checkout -q -b telechargements
           git config user.name "github-actions" && git config user.email "github-actions@users.noreply.github.com"
-          git add droplet-id-debug.apk && git commit -qm "APK de debug ${GITHUB_SHA}"
+          git add *.apk && git commit -qm "APK ${GITHUB_SHA}"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" telechargements
       - uses: actions/upload-artifact@v4
         if: failure()

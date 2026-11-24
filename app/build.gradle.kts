@@ -14,6 +14,9 @@ android {
         versionCode = 1
         versionName = "0.1.0"
     }
+    // Seulement la langue de l'app (le français) : les traductions des
+    // bibliothèques dans 80 langues ne sont pas embarquées.
+    androidResources { localeFilters += listOf("fr") }
     buildFeatures {
         compose = true
         buildConfig = true
@@ -22,11 +25,42 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
+    // La clé de signature de publication n'est JAMAIS dans le dépôt. Si la CI
+    // la reçoit (secrets GitHub, voir README), elle signe avec ; sinon la
+    // version release est signée avec la clé de debug : installable pour
+    // essayer, pas publiable sur Google Play.
+    val cleRelease = System.getenv("DROPLET_ID_KEYSTORE")?.let(::file)?.takeIf { it.exists() }
+    signingConfigs {
+        if (cleRelease != null) {
+            create("publication") {
+                storeFile = cleRelease
+                storePassword = System.getenv("DROPLET_ID_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("DROPLET_ID_KEY_ALIAS")
+                keyPassword = System.getenv("DROPLET_ID_KEY_PASSWORD")
+            }
+        }
+    }
     buildTypes {
         release {
+            // R8 : code et ressources inutilisés retirés, le reste optimisé.
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = if (cleRelease != null) signingConfigs.getByName("publication") else signingConfigs.getByName("debug")
         }
+    }
+    // Une APK par processeur (la bibliothèque de verre embarque du code natif) :
+    // chaque téléphone ne télécharge que la sienne.
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            isUniversalApk = false
+        }
+    }
+    packaging {
+        resources.excludes += setOf("META-INF/*.version", "META-INF/**/LICENSE*", "META-INF/AL2.0", "META-INF/LGPL2.1", "kotlin/**", "DebugProbesKt.bin")
     }
 }
 dependencies {

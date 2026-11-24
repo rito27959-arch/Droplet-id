@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Noir profond, avec une lueur de laiton très discrète en haut. -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
-    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
-    <path android:pathData="M0,0h108v108h-108z" android:fillColor="#0A0A0B" />
-    <path android:pathData="M0,0h108v108h-108z">
-        <aapt:attr name="android:fillColor">
-            <gradient android:type="radial" android:centerX="54" android:centerY="20" android:gradientRadius="70"
-                android:startColor="#26D6B35F" android:endColor="#00D6B35F" />
-        </aapt:attr>
-    </path>
+<!-- Noir profond, plus clair en haut, lueur de laiton derrière la médaille. Généré par l'outil d'icône. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt"
+  android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+  <path android:pathData="M0,0h108v108h-108z"><aapt:attr name="android:fillColor"><gradient android:type="linear" android:startX="54" android:startY="0" android:endX="54" android:endY="108"><item android:offset="0" android:color="#FF1C1C1F"/><item android:offset="1" android:color="#FF050506"/></gradient></aapt:attr></path>
+  <path android:pathData="M0,0h108v108h-108z"><aapt:attr name="android:fillColor"><gradient android:type="radial" android:centerX="54" android:centerY="50" android:gradientRadius="52"><item android:offset="0" android:color="#2ED6B35F"/><item android:offset="1" android:color="#00D6B35F"/></gradient></aapt:attr></path>
 </vector>

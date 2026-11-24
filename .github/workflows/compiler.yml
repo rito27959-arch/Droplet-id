@@ -16,8 +16,10 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - name: Plateforme Android 37
-        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37" > /dev/null
+      - name: Plateformes Android disponibles
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --list 2>/dev/null | grep -E "platforms;android-3[6-9]" | head -20 || true
+          # Le plugin Android installe la plateforme qui manque (licences acceptées sur les machines GitHub).
       - uses: gradle/actions/setup-gradle@v4
       - name: Compiler et tester
         run: ./gradlew --no-daemon --stacktrace :core:designsystem:testDebugUnitTest :app:testDebugUnitTest :app:assembleDebug

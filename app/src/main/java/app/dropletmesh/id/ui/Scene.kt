@@ -15,6 +15,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloat
 import app.dropletmesh.id.designsystem.RougeBoucle
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.runtime.withFrameNanos
@@ -121,7 +122,7 @@ fun BoutonMetal(texte: String, onClick: () -> Unit, modifier: Modifier = Modifie
             .background(if (actif) Metal else Brush.verticalGradient(listOf(GraphiteScene, GraphiteScene)))
             .drawWithContent {
                 drawContent()
-                if (reflet != null && reflet in 0f..1.4f) {
+                if (reflet != null && reflet >= 0f && reflet <= 1.4f) {
                     val x = size.width * reflet
                     drawRect(Brush.linearGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.55f), Color.Transparent), Offset(x - 90f, 0f), Offset(x + 90f, size.height)))
                 }

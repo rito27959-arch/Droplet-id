@@ -157,7 +157,7 @@ object IconesDroplet : GlasmioIconResolver {
 fun couleurTuile(icone: String): Color = when (icone) {
     // Une seule couleur dans toute l'app : la goutte, pour ce qui touche aux
     // apps et à la clé. Tout le reste en graphite.
-    Icone.APPS, Icone.PASSKEY, Icone.SCEAU, Icone.VERIFIE -> GoutteRemplie
+    Icone.APPS -> Color(0xFF3A3D44)
     Icone.ALERTE, Icone.SUPPRIMER, Icone.DECONNEXION, Icone.BLOQUER -> Color(0xFFD12B21)
     else -> Color(0xFF8E8E93)
 }

@@ -6,6 +6,10 @@
 // ============================================================================
 package app.dropletmesh.id.ui
 
+import androidx.compose.foundation.clickable
+
+import app.dropletmesh.id.designsystem.RougeBoucle
+
 import androidx.compose.ui.unit.em
 
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -229,7 +233,7 @@ private fun Formulaire(
                 Avertissement("Ce téléphone n'a pas de verrouillage d'écran : rien ne vérifie que c'est vous qui approuvez.")
             }
             etat.erreur?.let { Avertissement(it) }
-            Corps("Pas d'écran de connexion devant vous ? Refusez : quelqu'un essaie peut-être d'entrer dans votre compte.", secondaire = true)
+            Text("Pas d'écran de connexion devant vous ? Refusez : quelqu'un essaie peut-être d'entrer dans votre compte.", style = TextStyle(fontFamily = TexteDroplet, fontSize = 14.sp, lineHeight = 20.sp), color = ArgentScene2)
         }
         Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             BoutonMetal(
@@ -242,7 +246,12 @@ private fun Formulaire(
                     }
                 },
             )
-            BoutonTexte("Refuser", onClick = onRefuser, destructif = true, actif = !etat.occupe)
+            Text(
+                "Refuser",
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(999.dp)).clickable(enabled = !etat.occupe, role = androidx.compose.ui.semantics.Role.Button) { onRefuser() }.padding(vertical = 16.dp),
+                style = TextStyle(fontFamily = TexteDroplet, fontSize = 17.sp, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center),
+                color = RougeBoucle,
+            )
         }
     }
 }

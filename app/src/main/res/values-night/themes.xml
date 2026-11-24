@@ -1,6 +1,8 @@
 <resources>
     <style name="Theme.DropletID" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <item name="android:windowBackground">#0A0A0B</item>
+        <item name="android:windowBackground">#050506</item>
+        <item name="android:windowSplashScreenBackground">#050506</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_lanceur_premier_plan</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>

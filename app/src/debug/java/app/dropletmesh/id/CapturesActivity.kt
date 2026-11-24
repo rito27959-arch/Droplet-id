@@ -39,6 +39,7 @@ import app.dropletmesh.id.ui.Confidentialite
 import app.dropletmesh.id.ui.DetailConnexion
 import app.dropletmesh.id.ui.Identite
 import app.dropletmesh.id.ui.Navigation
+import app.dropletmesh.id.ui.Ouverture
 import app.dropletmesh.id.ui.Presentation
 import app.dropletmesh.id.ui.ReglageApparence
 import app.dropletmesh.id.ui.Securite
@@ -90,6 +91,9 @@ private val demande = EtatDemande(
 private fun Ecran(nom: String) {
     val nav = remember { Navigation(ouvrir = {}, retour = {}) }
     when (nom) {
+        "ouverture-1" -> Ouverture(onFin = {}, figer = 0.55f)
+        "ouverture-2" -> Ouverture(onFin = {}, figer = 1.25f)
+        "ouverture-3" -> Ouverture(onFin = {}, figer = 3.0f)
         "presentation" -> Presentation(onTerminer = {})
         "bienvenue" -> Bienvenue(exemple.copy(compte = EtatCompte(false, null, null, null)), onActiver = {})
         "accueil" -> Accueil(exemple, nav, {})

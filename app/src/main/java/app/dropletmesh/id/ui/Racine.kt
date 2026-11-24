@@ -90,6 +90,8 @@ fun Racine(etat: EtatApp, lienEntrant: LienDemande?, lienTraite: () -> Unit, rev
             lienTraite()
         }
     }
+    // L'ouverture animée : une fois par lancement de l'app (pas après une rotation).
+    var ouvertureVue by rememberSaveable { mutableStateOf(false) }
     ThemeDroplet(sombre = sombre, reduireTransparence = ui.reduireTransparence) {
         GlasmioBackdropHost(
             modifier = Modifier.fillMaxSize(),
@@ -97,14 +99,16 @@ fun Racine(etat: EtatApp, lienEntrant: LienDemande?, lienTraite: () -> Unit, rev
         ) {
             AnimatedContent(
                 targetState = when {
+                    !ouvertureVue && lienEntrant == null -> -1
                     !ui.presentationVue -> 0
                     !ui.compte.active -> 1
                     else -> 2
                 },
-                transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(200)) },
+                transitionSpec = { fadeIn(tween(450)) togetherWith fadeOut(tween(350)) },
                 label = "etape",
             ) { etape ->
                 when (etape) {
+                    -1 -> Ouverture(onFin = { ouvertureVue = true })
                     0 -> Presentation(onTerminer = etat::terminerPresentation)
                     1 -> Bienvenue(ui, onActiver = etat::activer)
                     else -> Principal(ui, etat)

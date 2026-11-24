@@ -13,7 +13,7 @@ timeout 20 adb shell wm dismiss-keyguard || true
 # Le journal complet, en continu : on y retrouve un plantage même si l'émulateur s'arrête.
 adb logcat -c || true
 (adb logcat -v time '*:W' > captures/journal.txt 2>&1 &)
-for ecran in presentation bienvenue accueil accueil-action identite acces acces-vide detail securite compte apparence confidentialite apropos approbation approuvee; do
+for ecran in ouverture-1 ouverture-2 ouverture-3 presentation bienvenue accueil accueil-action identite acces acces-vide detail securite compte apparence confidentialite apropos approbation approuvee; do
   for sombre in false true; do
     nom="$ecran-$([ "$sombre" = true ] && echo sombre || echo clair)"
     timeout 20 adb shell am force-stop app.dropletmesh.id

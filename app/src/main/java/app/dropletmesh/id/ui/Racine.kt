@@ -6,6 +6,18 @@
 // ============================================================================
 package app.dropletmesh.id.ui
 
+import androidx.compose.runtime.CompositionLocalProvider
+
+import androidx.compose.foundation.lazy.rememberLazyListState
+
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+
+import io.github.neoruaa.glasmio.scaffold.glasmioNavigationScrollHint
+
+import io.github.neoruaa.glasmio.scaffold.GlasmioOverscrollHost
+
+import io.github.neoruaa.glasmio.scaffold.rememberGlasmioNavigationScrollState
+
 import io.github.neoruaa.glasmio.ui.GlasmioTabItem
 
 import io.github.neoruaa.glasmio.ui.GlasmioNavigationBar
@@ -157,18 +169,24 @@ private fun Principal(ui: UiApp, etat: EtatApp) {
     BackHandler(enabled = pile.isNotEmpty()) { nav.retour() }
     BackHandler(enabled = pile.isEmpty() && onglet != Onglet.Accueil) { onglet = Onglet.Accueil }
 
-    Box(Modifier.fillMaxSize()) {
+    // Une liste par onglet ; la barre d'onglets se replie quand on défile.
+    val listes = Onglet.entries.associateWith { rememberLazyListState() }
+    val defilement = rememberGlasmioNavigationScrollState(listState = listes.getValue(onglet), enabled = pile.isEmpty())
+
+    // Le rebond élastique en haut et en bas des pages, comme sur iOS.
+    GlasmioOverscrollHost(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().nestedScroll(defilement.nestedScrollConnection)) {
         AnimatedContent(
             targetState = onglet,
             transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(160)) },
             label = "onglet",
         ) { o ->
-            when (o) {
+            CompositionLocalProvider(LocalListeOnglet provides listes.getValue(o)) { when (o) {
                 Onglet.Accueil -> Accueil(ui, nav, onScanner = { nav.ouvrir(Ecran.Scanner) }, onOnglet = { onglet = it })
                 Onglet.Apps -> Acces(ui, nav, onRafraichir = etat::chargerConnexions, enOnglet = true)
                 Onglet.Securite -> Securite(ui, nav, onOublier = etat::oublierCeTelephone, enOnglet = true)
                 Onglet.Reglages -> Reglages(ui, nav)
-            }
+            } }
         }
         // La barre d'onglets de verre de Glasmio, flottante.
         GlasmioNavigationBar(
@@ -181,9 +199,9 @@ private fun Principal(ui: UiApp, etat: EtatApp) {
             selectedKey = onglet,
             onSelected = { pile.clear(); onglet = it },
             onExpand = {},
-            compactProgress = remember { mutableFloatStateOf(0f) },
+            compactProgress = defilement.compactProgress,
             compactSize = 48.dp,
-            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.align(Alignment.BottomCenter).glasmioNavigationScrollHint(defilement.scrollHintProgress).navigationBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp),
         )
 
         // Les écrans poussés glissent depuis la droite, par-dessus la barre.
@@ -215,6 +233,7 @@ private fun Principal(ui: UiApp, etat: EtatApp) {
                 }
             }
         }
+    }
     }
 }
 

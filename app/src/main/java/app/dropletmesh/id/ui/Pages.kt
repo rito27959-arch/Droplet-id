@@ -4,6 +4,28 @@
 // ============================================================================
 package app.dropletmesh.id.ui
 
+import androidx.compose.ui.graphics.graphicsLayer
+
+import androidx.compose.ui.Modifier
+
+import androidx.compose.animation.core.CubicBezierEasing
+
+import androidx.compose.animation.core.tween
+
+import androidx.compose.animation.core.Animatable
+
+import androidx.compose.foundation.lazy.rememberLazyListState
+
+import androidx.compose.foundation.lazy.LazyListState
+
+import androidx.compose.runtime.LaunchedEffect
+
+import androidx.compose.runtime.remember
+
+import androidx.compose.runtime.CompositionLocalProvider
+
+import androidx.compose.runtime.staticCompositionLocalOf
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
@@ -24,6 +46,16 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 
+/**
+ * La liste de l'onglet affiché : la barre d'onglets la suit pour se replier
+ * quand on défile vers le bas et revenir quand on remonte (comme sur iOS).
+ */
+val LocalListeOnglet = staticCompositionLocalOf<LazyListState?> { null }
+
+/** Compte les groupes d'une page, pour qu'ils apparaissent l'un après l'autre. */
+private class Ordre { var n = 0 }
+private val LocalOrdre = staticCompositionLocalOf { Ordre() }
+
 @Composable
 fun Page(
     titre: String,
@@ -34,8 +66,11 @@ fun Page(
     contenu: LazyListScope.() -> Unit,
 ) {
     val bas = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + if (avecBarre) 96.dp else 32.dp
+    val liste = (if (retour == null) LocalListeOnglet.current else null) ?: rememberLazyListState()
+    CompositionLocalProvider(LocalOrdre provides remember { Ordre() }) {
     GlasmioPinnedListPage(
         title = titre,
+        listState = liste,
         subtitle = sousTitre,
         bottomPadding = bas,
         onNavigateBack = retour,
@@ -44,6 +79,7 @@ fun Page(
         backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
         content = contenu,
     )
+    }
 }
 
 /** Un groupe : en-tête discret, îlot de lignes, explication dessous. */
@@ -54,7 +90,12 @@ fun LazyListScope.groupe(
     lignes: @Composable () -> Unit,
 ) {
     item(key = cle) {
-        Column {
+        // Chaque groupe arrive à son tour : il monte de quelques points en s'éclaircissant.
+        val ordre = LocalOrdre.current
+        val rang = remember { ordre.n++ }
+        val arrivee = remember { Animatable(0f) }
+        LaunchedEffect(Unit) { arrivee.animateTo(1f, tween(520, delayMillis = 40 + rang.coerceAtMost(8) * 55, easing = CubicBezierEasing(0.16f, 1f, 0.3f, 1f))) }
+        Column(Modifier.graphicsLayer { alpha = arrivee.value; translationY = (1f - arrivee.value) * 28.dp.toPx() }) {
             titre?.let { TitreSection(it) }
             GlasmioGroupedList { lignes() }
             pied?.let { PiedSection(it) }

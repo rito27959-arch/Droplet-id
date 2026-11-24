@@ -5,6 +5,14 @@
 // ============================================================================
 package app.dropletmesh.id.ui
 
+import androidx.compose.ui.draw.clip
+
+import androidx.compose.foundation.background
+
+import androidx.compose.foundation.layout.height
+
+import androidx.compose.foundation.layout.fillMaxWidth
+
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -30,6 +38,25 @@ fun Identite(ui: UiApp, nav: Navigation) {
     val contexte = LocalContext.current
     val c = Droplet.couleurs
     Page(titre = "Informations personnelles", retour = nav.retour) {
+        // L'identifiant, en grand, comme gravé sur une plaque de métal.
+        item(key = "plaque") {
+            androidx.compose.foundation.layout.Column(
+                Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 6.dp)
+                    .clip(com.kyant.capsule.ContinuousRoundedRectangle(24.dp))
+                    .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(androidx.compose.ui.graphics.Color(0xFF26282D), androidx.compose.ui.graphics.Color(0xFF111215))))
+                    .padding(22.dp),
+            ) {
+                Text("Identifiant Droplet", style = TextStyle(fontFamily = app.dropletmesh.id.designsystem.TexteDroplet, fontSize = 13.sp), color = app.dropletmesh.id.designsystem.ArgentScene2)
+                androidx.compose.foundation.layout.Spacer(Modifier.height(8.dp))
+                Text(
+                    idAffiche(ui.compte.compteId),
+                    style = TextStyle(fontFamily = app.dropletmesh.id.designsystem.TitresDroplet, fontSize = 26.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, letterSpacing = 1.sp, fontFeatureSettings = "tnum"),
+                    color = androidx.compose.ui.graphics.Color.White,
+                )
+                androidx.compose.foundation.layout.Spacer(Modifier.height(14.dp))
+                Text("Créé sur ${ui.appareil.modele}", style = TextStyle(fontFamily = app.dropletmesh.id.designsystem.TexteDroplet, fontSize = 13.sp), color = app.dropletmesh.id.designsystem.ArgentScene2)
+            }
+        }
         groupe("identifiants", titre = "Identifiants", pied = "Chaque app reçoit un autre identifiant, calculé pour elle seule : deux apps ne peuvent pas savoir qu'il s'agit de vous.") {
             GlasmioListRow(
                 title = "Identifiant Droplet",

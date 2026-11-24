@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Version debug seulement : l'écran des captures (données d'exemple). -->
+    <application>
+        <activity android:name=".CapturesActivity" android:exported="true" android:theme="@style/Theme.DropletID" />
+    </application>
+</manifest>

@@ -52,7 +52,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.dropletmesh.id.donnees.LienDemande
 import app.dropletmesh.id.donnees.Liens
 import app.dropletmesh.id.designsystem.BoutonPrincipal
-import app.dropletmesh.id.designsystem.LaitonCarte
+import app.dropletmesh.id.designsystem.Goutte
 import app.dropletmesh.id.designsystem.TexteDroplet
 import app.dropletmesh.id.designsystem.TitresDroplet
 import com.google.zxing.BarcodeFormat
@@ -141,7 +141,7 @@ fun Scanner(onLien: (LienDemande) -> Unit, onFermer: () -> Unit) {
     }
 }
 
-/** Les quatre coins du viseur, en laiton. */
+/** Les quatre coins du viseur, de la couleur goutte. */
 @Composable
 private fun Viseur(modifier: Modifier) {
     Canvas(modifier) {
@@ -150,8 +150,8 @@ private fun Viseur(modifier: Modifier) {
         val w = size.width
         val h = size.height
         fun coin(a: Offset, b: Offset, c: Offset) {
-            drawLine(LaitonCarte, a, b, e, StrokeCap.Round)
-            drawLine(LaitonCarte, a, c, e, StrokeCap.Round)
+            drawLine(Goutte, a, b, e, StrokeCap.Round)
+            drawLine(Goutte, a, c, e, StrokeCap.Round)
         }
         coin(Offset(0f, 0f), Offset(l, 0f), Offset(0f, l))
         coin(Offset(w, 0f), Offset(w - l, 0f), Offset(w, l))

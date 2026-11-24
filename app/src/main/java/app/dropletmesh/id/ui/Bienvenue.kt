@@ -94,7 +94,7 @@ fun Presentation(onTerminer: () -> Unit) {
             ) {
                 if (i == 0) {
                     CarteIdentite(
-                        compteId = "DROPLETIDEXEMPLE",
+                        compteId = null,
                         ligneBas = "Votre identité",
                         ligneBasDroite = "Ce téléphone",
                         modifier = Modifier.padding(horizontal = 8.dp),

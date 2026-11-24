@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import app.dropletmesh.id.Chargement
 import app.dropletmesh.id.UiApp
@@ -136,8 +137,16 @@ fun DetailConnexion(ui: UiApp, clientId: String, nav: Navigation, onRetirer: (Co
         }
         item(key = "entete") {
             Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Initiale(cx.nom, taille = 72)
-                Spacer(Modifier.height(12.dp))
+                // L'icône officielle, posée sur une lumière d'argent.
+                Box(contentAlignment = Alignment.Center) {
+                    androidx.compose.foundation.Canvas(Modifier.size(160.dp)) {
+                        drawCircle(androidx.compose.ui.graphics.Brush.radialGradient(listOf(androidx.compose.ui.graphics.Color(0x33C8CCD4), androidx.compose.ui.graphics.Color.Transparent)))
+                    }
+                    Initiale(cx.nom, taille = 88)
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(cx.nom, style = TextStyle(fontFamily = TitresDroplet, fontSize = 24.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.02).em), color = Droplet.couleurs.texte)
+                Spacer(Modifier.height(4.dp))
                 Corps("Connectée ${ilYA(cx.accordeLe)}", secondaire = true)
             }
         }

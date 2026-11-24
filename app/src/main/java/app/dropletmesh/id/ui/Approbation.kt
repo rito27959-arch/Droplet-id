@@ -6,6 +6,32 @@
 // ============================================================================
 package app.dropletmesh.id.ui
 
+import androidx.compose.ui.unit.em
+
+import androidx.compose.ui.platform.LocalHapticFeedback
+
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+
+import androidx.compose.ui.geometry.Offset
+
+import androidx.compose.ui.graphics.graphicsLayer
+
+import androidx.compose.ui.graphics.Color
+
+import androidx.compose.animation.core.spring
+
+import androidx.compose.animation.core.animateFloatAsState
+
+import androidx.compose.animation.core.Animatable
+
+import app.dropletmesh.id.designsystem.LogoCeinture
+
+import app.dropletmesh.id.designsystem.ArgentScene2
+
+import app.dropletmesh.id.designsystem.ArgentScene
+
+import app.dropletmesh.id.designsystem.ThemeDroplet
+
 import android.content.Context
 import android.content.ContextWrapper
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
@@ -92,10 +118,9 @@ fun Approbation(
     onRefuser: () -> Unit,
     onFermer: () -> Unit,
 ) {
-    val c = Droplet.couleurs
-    Box(Modifier.fillMaxSize()) {
-        Box(Modifier.fillMaxSize().background(Droplet.couleurs.fond))
-        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to c.goutte.copy(alpha = if (c.sombre) 0.10f else 0.06f), 0.32f to c.goutte.copy(alpha = 0f))))
+    // Un moment de confiance : toujours sur la scène noire, comme l'ouverture.
+    ThemeDroplet(sombre = true) {
+    FondScene(lumiere = 0.5f) {
         AnimatedContent(
             targetState = when {
                 etat.resultat != null -> 2
@@ -113,6 +138,7 @@ fun Approbation(
                 else -> Formulaire(etat, appareil, onApprouver, onRefuser, onFermer)
             }
         }
+    }
     }
 }
 
@@ -138,7 +164,7 @@ private fun Formulaire(
             Text(
                 if (etat.lien.emetteur == Liens.TEST) "DROPLET ID · TEST" else "DROPLET ID",
                 style = TextStyle(fontFamily = TexteDroplet, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.4.sp),
-                color = c.goutte,
+                color = ArgentScene2,
                 modifier = Modifier.padding(start = 4.dp),
             )
             Spacer(Modifier.weight(1f))
@@ -148,24 +174,22 @@ private fun Formulaire(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(22.dp),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Initiale(d.nomApp, taille = 56)
-                Spacer(Modifier.width(14.dp))
-                Column {
-                    Text(d.nomApp, style = TextStyle(fontFamily = TexteDroplet, fontSize = 17.sp, fontWeight = FontWeight.SemiBold), color = c.texte)
-                    if (d.site.isNotEmpty()) {
-                        Text(d.site, style = TextStyle(fontFamily = ChiffresDroplet, fontSize = 13.sp), color = c.texteSecondaire)
-                    }
+            // L'app et Droplet ID, reliés par un fil qui se trace.
+            Lien(d.nomApp)
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    "Se connecter à ${d.nomApp} ?",
+                    Modifier.semantics { heading() },
+                    style = TextStyle(fontFamily = TitresDroplet, fontSize = 28.sp, lineHeight = 32.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.025).em, textAlign = TextAlign.Center),
+                    color = Color.White,
+                )
+                if (d.site.isNotEmpty()) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(d.site, style = TextStyle(fontFamily = TexteDroplet, fontSize = 14.sp), color = ArgentScene2)
                 }
             }
-            Text(
-                "Se connecter à ${d.nomApp} ?",
-                Modifier.semantics { heading() },
-                style = TextStyle(fontFamily = TitresDroplet, fontSize = 30.sp, lineHeight = 36.sp, fontWeight = FontWeight.SemiBold),
-                color = c.texte,
-            )
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Corps("Tapez le nombre affiché sur l'écran de connexion.", secondaire = true)
+                Text("Tapez le nombre affiché sur l'écran de connexion.", Modifier.fillMaxWidth(), style = TextStyle(fontFamily = TexteDroplet, fontSize = 15.sp, textAlign = TextAlign.Center), color = ArgentScene2)
                 ChampCode(code, { code = it.filter(Char::isDigit).take(2) }, Modifier.focusRequester(focus))
             }
             Column {
@@ -208,9 +232,10 @@ private fun Formulaire(
             Corps("Pas d'écran de connexion devant vous ? Refusez : quelqu'un essaie peut-être d'entrer dans votre compte.", secondaire = true)
         }
         Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            BoutonPrincipal(
+            BoutonMetal(
                 if (etat.occupe) "Approbation…" else "Approuver",
                 actif = code.length == 2 && !etat.occupe,
+                brille = code.length == 2 && !etat.occupe,
                 onClick = {
                     deverrouiller(contexte, "Se connecter à ${d.nomApp}", appareil.verrouEcran) {
                         onApprouver(code, partager, pseudo)
@@ -239,12 +264,19 @@ private fun ChampCode(valeur: String, onChange: (String) -> Unit, modifier: Modi
                 repeat(2) { i ->
                     val chiffre = valeur.getOrNull(i)?.toString().orEmpty()
                     val actif = i == valeur.length.coerceAtMost(1)
+                    val arrivee by animateFloatAsState(if (chiffre.isEmpty()) 0f else 1f, spring(dampingRatio = 0.5f, stiffness = 500f), label = "chiffre")
                     Box(
-                        Modifier.size(width = 84.dp, height = 100.dp).clip(RoundedCornerShape(18.dp)).background(c.surface)
-                            .border(if (actif) 2.dp else 1.dp, if (actif) c.goutte else c.bordure, RoundedCornerShape(18.dp)),
+                        Modifier.size(width = 84.dp, height = 100.dp).clip(RoundedCornerShape(20.dp))
+                            .background(Brush.verticalGradient(listOf(Color(0xFF1F2024), Color(0xFF141518))))
+                            .border(if (actif) 1.5.dp else 1.dp, if (actif) ArgentScene else Color(0xFF2E3035), RoundedCornerShape(20.dp)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(chiffre, style = TextStyle(fontFamily = ChiffresDroplet, fontSize = 46.sp, fontWeight = FontWeight.Medium), color = c.texte)
+                        Text(
+                            chiffre,
+                            Modifier.graphicsLayer { scaleX = 0.6f + 0.4f * arrivee; scaleY = scaleX; alpha = arrivee; translationY = (1 - arrivee) * 18f },
+                            style = TextStyle(fontFamily = TitresDroplet, fontSize = 48.sp, fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"),
+                            color = Color.White,
+                        )
                     }
                 }
                 Box(Modifier.size(1.dp)) { interne() }
@@ -275,34 +307,70 @@ private fun Resultat(etat: EtatDemande, onFermer: () -> Unit) {
             }
         }
         Fin(
-            sceau = true,
+            boucle = true,
             titre = "Connexion approuvée",
             texte = if (etat.depuisLien) "Retour sur $nom…" else "Revenez sur $nom : la connexion se termine.",
             bouton = if (etat.depuisLien) "Revenir au navigateur" else "Terminé",
             onFermer = onFermer,
         )
     } else {
-        Fin(icone = Icone.BLOQUER, titre = "Connexion refusée", texte = "$nom ne vous a pas connecté.", bouton = "Fermer", onFermer = onFermer)
+        Fin(boucle = false, titre = "Connexion refusée", texte = "$nom ne vous a pas connecté.", bouton = "Fermer", onFermer = onFermer)
     }
 }
 
 @Composable
-private fun Fin(titre: String, texte: String, bouton: String, onFermer: () -> Unit, icone: String? = null, sceau: Boolean = false) {
-    val c = Droplet.couleurs
+private fun Fin(titre: String, texte: String, bouton: String, onFermer: () -> Unit, icone: String? = null, boucle: Boolean? = null) {
+    val retour = LocalHapticFeedback.current
+    val ceinture = remember { Animatable(if (boucle == false) 1f else 0f) }
+    val eclat = remember { Animatable(0f) }
+    LaunchedEffect(boucle) {
+        if (boucle == null) return@LaunchedEffect
+        delay(250)
+        ceinture.animateTo(if (boucle) 1f else 0f, tween(560))
+        if (boucle) { retour.performHapticFeedback(HapticFeedbackType.Confirm); eclat.animateTo(1f, tween(650)) }
+        else retour.performHapticFeedback(HapticFeedbackType.Reject)
+    }
     Column(
-        Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(20.dp),
+        Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(Modifier.weight(1f))
-        if (sceau) Sceau() else if (icone != null) GlasmioIcon(icone, contentDescription = null, tint = c.texteSecondaire, size = 64.dp)
-        Spacer(Modifier.height(24.dp))
-        Text(titre, style = TextStyle(fontFamily = TitresDroplet, fontSize = 28.sp, fontWeight = FontWeight.SemiBold), color = c.texte, textAlign = TextAlign.Center)
+        if (boucle != null) {
+            Box(Modifier.size(150.dp).graphicsLayer { alpha = if (boucle) 1f else 0.75f }.clip(RoundedCornerShape(30))) {
+                LogoCeinture(Modifier.fillMaxSize(), boucle = ceinture.value, eclat = eclat.value)
+            }
+        } else if (icone != null) GlasmioIcon(icone, contentDescription = null, tint = ArgentScene2, size = 64.dp)
+        Spacer(Modifier.height(28.dp))
+        Text(titre, style = TextStyle(fontFamily = TitresDroplet, fontSize = 28.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.025).em), color = Color.White, textAlign = TextAlign.Center)
         Spacer(Modifier.height(8.dp))
-        Corps(texte, secondaire = true)
+        Text(texte, style = TextStyle(fontFamily = TexteDroplet, fontSize = 16.sp, lineHeight = 23.sp, textAlign = TextAlign.Center), color = ArgentScene2)
         Spacer(Modifier.weight(1.4f))
-        BoutonPrincipal(bouton, onClick = onFermer)
+        BoutonMetal(bouton, onClick = onFermer)
     }
 }
+
+/** L'icône de l'app à gauche, Droplet ID à droite, et le fil qui les relie. */
+@Composable
+private fun Lien(nomApp: String) {
+    val trace = remember { Animatable(0f) }
+    LaunchedEffect(Unit) { trace.animateTo(1f, tween(900, delayMillis = 150)) }
+    Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(68.dp).graphicsLayer { val q = borneApprob(trace.value * 3f); scaleX = 0.7f + 0.3f * q; scaleY = scaleX; alpha = q }) { Initiale(nomApp, taille = 68) }
+        androidx.compose.foundation.Canvas(Modifier.width(76.dp).height(20.dp)) {
+            val y = size.height / 2
+            val n = 7
+            repeat(n) { i ->
+                val q = borneApprob(trace.value * 1.6f - i * 0.1f)
+                drawCircle(ArgentScene.copy(alpha = q * (if (i == n / 2) 1f else 0.6f)), if (i == n / 2) 3.5.dp.toPx() else 2.dp.toPx(), Offset(size.width * (i + 0.5f) / n, y))
+            }
+        }
+        Box(Modifier.size(68.dp).graphicsLayer { val q = borneApprob(trace.value * 3f - 1f); scaleX = 0.7f + 0.3f * q; scaleY = scaleX; alpha = q }.clip(RoundedCornerShape(30))) {
+            LogoCeinture(Modifier.fillMaxSize(), description = null)
+        }
+    }
+}
+
+private fun borneApprob(v: Float) = v.coerceIn(0f, 1f)
 
 /**
  * Le déverrouillage avant d'approuver : empreinte, visage ou code de

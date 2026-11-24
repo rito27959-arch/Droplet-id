@@ -164,42 +164,10 @@ fun Sceau(modifier: Modifier = Modifier, taille: Dp = 88.dp, couleur: Color = Dr
     }
 }
 
-/**
- * L'avatar de Droplet ID : la goutte blanche sur un disque goutte, et
- * derrière, la lueur de la famille (une seule par écran).
- */
+/** L'avatar de Droplet ID : le logo à la ceinture, bouclé, dans sa forme arrondie. */
 @Composable
 fun AvatarDroplet(modifier: Modifier = Modifier, taille: Dp = 92.dp, lueur: Boolean = true) {
-    val c = Droplet.couleurs
     Box(
-        modifier.size(taille).clearAndSetSemantics { }.drawBehind {
-            if (lueur) {
-                drawCircle(
-                    Brush.radialGradient(
-                        listOf(Goutte.copy(alpha = if (c.sombre) 0.42f else 0.30f), Color.Transparent),
-                        center = center,
-                        radius = size.minDimension * 0.95f,
-                    ),
-                    radius = size.minDimension * 0.95f,
-                )
-            }
-        },
-        contentAlignment = Alignment.Center,
-    ) {
-        Canvas(Modifier.size(taille)) {
-            drawCircle(Brush.verticalGradient(listOf(Goutte, GoutteRemplie)))
-            // La goutte : une pointe en haut, un ventre rond en bas.
-            val w = size.width
-            val h = size.height
-            val goutte = Path().apply {
-                moveTo(w * 0.5f, h * 0.24f)
-                cubicTo(w * 0.62f, h * 0.38f, w * 0.71f, h * 0.48f, w * 0.71f, h * 0.58f)
-                cubicTo(w * 0.71f, h * 0.70f, w * 0.616f, h * 0.79f, w * 0.5f, h * 0.79f)
-                cubicTo(w * 0.384f, h * 0.79f, w * 0.29f, h * 0.70f, w * 0.29f, h * 0.58f)
-                cubicTo(w * 0.29f, h * 0.48f, w * 0.38f, h * 0.38f, w * 0.5f, h * 0.24f)
-                close()
-            }
-            drawPath(goutte, Color.White)
-        }
-    }
+        modifier.size(taille).clip(com.kyant.capsule.ContinuousRoundedRectangle(taille * 0.3f)),
+    ) { LogoCeinture(Modifier.size(taille), description = null) }
 }

@@ -1,110 +1,485 @@
 /* ==========================================================================
-   DROPLET ID — la palette du logo.
-   Le noir du fond, l'argent du cœur, le graphite de la sangle, et le rouge
-   du bouton de la boucle : une seule touche de rouge par écran.
+   DROPLET DESIGN LANGUAGE — le système commun aux sites Droplet
+   --------------------------------------------------------------------------
+   • Base Quiet Futurism : neutres froids, une seule encre. La couleur
+     d'action n'est pas encore choisie (décision G3) : l'encre en tient lieu.
+   • Commissioner pour l'interface (axe Flair en titre), Martian Mono pour
+     les données, Newsreader pour l'éditorial.
+   • Un thème clair et un thème sombre, au choix ou selon le système.
+   • Le mouvement : seulement là où il explique (voir la carte du mouvement
+     du document « Architecture du site Droplet »). Transform et opacité.
+   Même fichier sur dropletmesh.app, drop.dropletmesh.app, le site Droplet ID
+   et Droplet Labs : une correction ici se recopie là-bas.
    ========================================================================== */
+
+@font-face {
+  font-family: 'Commissioner';
+  src: url('../fonts/commissioner.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Martian Mono';
+  src: url('../fonts/martian-mono.woff2') format('woff2');
+  font-weight: 100 800;
+  font-stretch: 75% 112.5%;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Newsreader';
+  src: url('../fonts/newsreader.woff2') format('woff2');
+  font-weight: 200 800;
+  font-display: swap;
+}
+
 :root {
-  --noir: #050506;
-  --noir-2: #0e0f12;
-  --graphite: #1b1c20;
-  --graphite-2: #2a2c31;
-  --trait: rgba(255, 255, 255, 0.09);
-  --argent: #e6e8eb;
-  --argent-2: #a4a8af;      /* 7,9:1 sur le noir */
-  --argent-3: #7c8189;      /* 4,9:1 sur le noir : petits textes seulement */
-  --rouge: #e03a2f;
-  --metal: linear-gradient(180deg, #ffffff 0%, #c3c6cc 55%, #8e939a 100%);
-  --titres: 'Inter Tight Variable', 'Inter Tight', system-ui, sans-serif;
-  --texte: 'Inter Variable', Inter, system-ui, sans-serif;
-  --courbe: cubic-bezier(0.16, 1, 0.3, 1);
-  --large: min(1120px, 100% - 40px);
+  /* Primitifs */
+  --gris-0: #ffffff;
+  --gris-50: #f3f5f7;
+  --gris-100: #e6eaee;
+  --gris-200: #c9d0d6;
+  --gris-500: #59626b;
+  --gris-550: #8d97a1;
+  --gris-800: #1d242b;
+  --gris-850: #12171c;
+  --gris-900: #0b0f13;
+  --gris-950: #05070a;
+
+  /* Sémantiques, thème clair */
+  --fond: var(--gris-100);
+  --surface: var(--gris-50);
+  --surface-haute: var(--gris-0);
+  --encre: #0e1216;
+  --encre-douce: var(--gris-500);
+  --trait: var(--gris-200);
+  --sur-encre: var(--gris-50);
+  --erreur: #b4232c;
+  --succes: #1d6b45;
+
+  /* Polices : Commissioner d'abord, puis les écritures qu'elle ne couvre pas. */
+  --police: 'Commissioner', 'Noto Sans Arabic', 'Noto Sans Devanagari', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --police-mono: 'Martian Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --police-edito: 'Newsreader', 'Noto Serif', Georgia, serif;
+
+  /* Échelle DDL ; affichage × 1,4 au-delà de 1024 px */
+  --t-display: clamp(40px, 6.4vw, 78px);
+  --t-headline: clamp(30px, 4.2vw, 52px);
+  --t-title: 28px;
+  --t-subtitle: 20px;
+  --t-body: 16px;
+  --t-label: 14px;
+  --t-caption: 12.5px;
+
+  /* Espace (pas de 4) */
+  --e-1: 4px;
+  --e-2: 8px;
+  --e-3: 12px;
+  --e-4: 16px;
+  --e-5: 24px;
+  --e-6: 32px;
+  --e-7: 48px;
+  --e-8: 72px;
+  --e-9: 112px;
+  --gouttiere: clamp(16px, 4vw, 32px);
+  --large-max: 1160px;
+  --lecture-max: 720px;
+
+  /* Formes */
+  --r-controle: 12px;
+  --r-carte: 22px;
+  --r-pilule: 999px;
+
+  /* Mouvement */
+  --sortie: cubic-bezier(0.23, 1, 0.32, 1);
+  --entree-sortie: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Les noms des versions précédentes, pour les pages qui les emploient encore
+     (documents, invitation). Ils suivent le thème. */
+  --noir: var(--fond);
+  --blanc: var(--surface-haute);
+  --gris: var(--surface);
+  --encre-2: var(--encre-douce);
+  --clair: var(--encre);
+  --clair-2: var(--encre-douce);
+  --goutte: var(--encre);
+  --lien-clair: var(--encre);
+  --lien-sombre: var(--encre);
+  --f-titre: var(--police);
+  --f-texte: var(--police);
+  --t-0: 0.8125rem;
+  --t-1: 1rem;
+  --t-2: 1.25rem;
+  --t-3: 1.75rem;
+  --t-4: clamp(1.9rem, 1.2rem + 2.4vw, 3.25rem);
+  --t-5: clamp(2.5rem, 1.3rem + 4.4vw, 4.5rem);
+  --t-6: clamp(3rem, 1rem + 7vw, 6rem);
+  --largeur: var(--lecture-max);
+  --large: var(--large-max);
+  --ease: var(--sortie);
+  --ease-sortie: var(--sortie);
+  /* Les noms du site Droplet ID d'avant. */
+  --noir-2: var(--surface);
+  --graphite: var(--surface);
+  --graphite-2: var(--trait);
+  --argent: var(--encre);
+  --argent-2: var(--encre-douce);
+  --argent-3: var(--encre-douce);
+  --rouge: var(--erreur);
+  --metal: var(--encre);
+  --titres: var(--police);
+  --texte: var(--police);
+  --courbe: var(--sortie);
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --fond: var(--gris-950);
+  --surface: var(--gris-900);
+  --surface-haute: var(--gris-850);
+  --encre: #edf1f4;
+  --encre-douce: var(--gris-550);
+  --trait: var(--gris-800);
+  --sur-encre: var(--gris-950);
+  --erreur: #ff8a8a;
+  --succes: #5fd39a;
   color-scheme: dark;
 }
 
-*, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+[hidden] {
+  display: none !important;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--fond);
+}
+html.sans-defilement {
+  overflow: hidden;
+}
 body {
   margin: 0;
-  background: var(--noir);
-  color: var(--argent);
-  font-family: var(--texte);
-  font-size: 17px;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: var(--police);
+  font-size: var(--t-body);
   line-height: 1.5;
-  letter-spacing: -0.011em;
+  font-variation-settings: 'FLAR' 0, 'VOLM' 0;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
 }
-img { display: block; max-width: 100%; }
-a { color: inherit; }
-:focus-visible { outline: 2px solid var(--rouge); outline-offset: 3px; border-radius: 6px; }
-
-.conteneur { width: var(--large); margin-inline: auto; }
-
-/* Titres : Inter Tight, serrés, argentés. */
-.titre-1, .titre-2, .titre-3 {
-  font-family: var(--titres);
-  font-weight: 700;
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--police);
+  font-weight: 640;
   margin: 0;
   text-wrap: balance;
-  background: linear-gradient(180deg, #ffffff 10%, #b9bdc4 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
-.titre-1 { font-size: clamp(44px, 8.6vw, 104px); line-height: 1.0; letter-spacing: -0.035em; }
-.titre-2 { font-size: clamp(34px, 5.6vw, 64px); line-height: 1.05; letter-spacing: -0.03em; }
-.titre-3 { font-size: clamp(22px, 2.4vw, 28px); line-height: 1.2; letter-spacing: -0.02em; }
-.chapeau { font-size: clamp(19px, 2vw, 24px); line-height: 1.4; color: var(--argent-2); margin: 0; text-wrap: pretty; max-width: 34ch; }
-.texte { color: var(--argent-2); margin: 0; text-wrap: pretty; }
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+a {
+  color: inherit;
+}
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+:focus-visible {
+  outline: 2px solid var(--encre);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
 
-/* Boutons : le principal est en métal, le secondaire en contour. */
+/* Mise en page */
+.conteneur,
+.contenu--large {
+  width: min(100% - 2 * var(--gouttiere), var(--large-max));
+  margin-inline: auto;
+}
+.contenu {
+  width: min(100% - 2 * var(--gouttiere), var(--lecture-max));
+  margin-inline: auto;
+}
+.section {
+  padding-top: var(--e-9);
+}
+/* Les anciennes classes de fond : un seul fond désormais, celui du thème. */
+.fond-noir,
+.fond-gris,
+.fond-blanc {
+  background: var(--fond);
+  color: var(--encre);
+}
+
+/* Rôles typographiques. Le Flair diminue avec la taille. */
+.display {
+  font-size: var(--t-display);
+  line-height: 1.04;
+  font-weight: 640;
+  letter-spacing: -0.025em;
+  font-variation-settings: 'FLAR' 80, 'VOLM' 30;
+  text-wrap: balance;
+}
+.headline,
+.titre-section {
+  font-size: var(--t-headline);
+  line-height: 1.08;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  font-variation-settings: 'FLAR' 70, 'VOLM' 20;
+  text-wrap: balance;
+}
+.title {
+  font-size: var(--t-title);
+  line-height: 1.2;
+  font-weight: 660;
+  letter-spacing: -0.015em;
+  font-variation-settings: 'FLAR' 50;
+}
+.subtitle {
+  font-size: var(--t-subtitle);
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.008em;
+  font-variation-settings: 'FLAR' 20;
+}
+.body {
+  font-size: var(--t-body);
+  line-height: 1.5;
+}
+.label {
+  font-size: var(--t-label);
+  line-height: 1.4;
+  font-weight: 600;
+}
+.caption {
+  font-size: var(--t-caption);
+  line-height: 1.35;
+  font-weight: 450;
+  letter-spacing: 0.01em;
+  color: var(--encre-douce);
+}
+.technique {
+  font-family: var(--police-mono);
+  font-size: 13px;
+  line-height: 1.55;
+  font-weight: 450;
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-stretch: 92%;
+}
+.editorial {
+  font-family: var(--police-edito);
+  font-size: clamp(22px, 2.6vw, 32px);
+  line-height: 1.42;
+  font-weight: 400;
+  font-optical-sizing: auto;
+  text-wrap: pretty;
+}
+.doux {
+  color: var(--encre-douce);
+}
+.chapo {
+  font-size: clamp(17px, 1.5vw, 20px);
+  line-height: 1.55;
+  color: var(--encre-douce);
+  max-width: 52ch;
+}
+
+/* Boutons : seul l'appui bouge. */
 .bouton {
-  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  min-height: 52px; padding: 0 26px; border-radius: 999px;
-  font: 600 17px/1 var(--texte); text-decoration: none; letter-spacing: -0.01em;
-  transition: transform 200ms var(--courbe), filter 200ms var(--courbe);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: var(--r-pilule);
+  border: 1px solid transparent;
+  background: var(--encre);
+  color: var(--sur-encre);
+  font: 600 15px/1 var(--police);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 160ms var(--sortie), opacity 150ms ease, border-color 150ms ease;
+  -webkit-tap-highlight-color: transparent;
 }
-.bouton:active { transform: scale(0.97); }
-.bouton-metal { background: var(--metal); color: #0e0f12; box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 10px 30px rgba(0,0,0,.5); }
-.bouton-metal:hover { filter: brightness(1.06); }
-.bouton-contour { color: var(--argent); border: 1px solid rgba(255,255,255,.22); }
-.bouton-contour:hover { border-color: rgba(255,255,255,.45); }
+.bouton:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) and (pointer: fine) {
+  .bouton:hover {
+    opacity: 0.88;
+  }
+  .bouton--secondaire:hover {
+    opacity: 1;
+    border-color: var(--encre-douce);
+  }
+}
+.bouton--secondaire {
+  background: transparent;
+  color: var(--encre);
+  border-color: var(--trait);
+}
+.bouton--petit {
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+.bouton svg {
+  width: 18px;
+  height: 18px;
+}
+.lien-fleche,
+.lien {
+  color: var(--encre);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+.lien-fleche::after {
+  content: none;
+}
 
-/* Le logo dans sa boîte arrondie (le SVG a un fond carré). */
-.boite-logo { border-radius: 30%; overflow: hidden; }
-.boite-logo svg { width: 100%; height: 100%; }
+/* Les apparitions au défilement sont retirées : le contenu est là, tout de suite. */
+.apparait {
+  opacity: 1;
+  transform: none;
+}
 
-/* Les scènes épinglées : la section est haute, son contenu reste à l'écran. */
-.scene { position: relative; }
-.epingle { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-html:not(.anime) .scene { height: auto !important; }
-html:not(.anime) .epingle { position: relative; height: auto; padding: 120px 0; }
-
-/* Mises en page communes. */
-.bloc { padding: clamp(96px, 14vw, 180px) 0; }
-.bloc-sombre { background: var(--noir-2); border-block: 1px solid var(--trait); }
-.centre { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; }
-.centre-texte { text-align: center; margin-inline: auto; }
-.actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
-.surtitre-page { padding: clamp(110px, 16vw, 200px) 0 clamp(48px, 8vw, 96px); }
-.mots { background: none; color: var(--argent); -webkit-text-fill-color: currentColor; }
-.mots span { display: inline-block; white-space: pre; opacity: calc(0.14 + 0.86 * clamp(0, (var(--p, 1) - 0.1) * 24 - var(--i), 1)); }
-html:not(.anime) .mots span { opacity: 1; }
-
-/* Les transitions entre pages : l'ancienne page s'efface en reculant, la nouvelle arrive. */
-@view-transition { navigation: auto; }
-::view-transition-old(root) { animation: 380ms cubic-bezier(.4,0,1,1) both sortie; }
-::view-transition-new(root) { animation: 620ms cubic-bezier(.16,1,.3,1) both entree; }
-@keyframes sortie { to { opacity: 0; transform: scale(.97); filter: blur(6px); } }
-@keyframes entree { from { opacity: 0; transform: translateY(24px); filter: blur(8px); } }
-
-/* Une seule apparition par section, déclenchée par le défilement. */
-.apparait { opacity: 0; transform: translateY(36px); filter: blur(6px); transition: opacity 1s var(--courbe), transform 1s var(--courbe), filter 1s var(--courbe); transition-delay: calc(var(--d, 0) * 90ms); }
-.apparait.est-visible { opacity: 1; transform: none; filter: none; }
-html:not(.anime) .apparait { opacity: 1; transform: none; filter: none; }
+/* Transitions entre pages (Chrome 126+, Safari 18.2+ ; ailleurs la page change simplement). */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-group(*) {
+  animation-duration: 320ms;
+  animation-timing-function: var(--entree-sortie);
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .apparait { opacity: 1; transform: none; transition: none; }
-  *, *::before, *::after { animation: none !important; transition: none !important; }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* ── Les classes du site Droplet ID d'avant, sur le nouveau système ── */
+.titre-1,
+.titre-2,
+.titre-3 {
+  margin: 0;
+  color: var(--encre);
+  text-wrap: balance;
+}
+.titre-1 {
+  font-size: var(--t-display);
+  line-height: 1.04;
+  font-weight: 640;
+  letter-spacing: -0.025em;
+  font-variation-settings: 'FLAR' 80, 'VOLM' 30;
+}
+.titre-2 {
+  font-size: var(--t-headline);
+  line-height: 1.08;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  font-variation-settings: 'FLAR' 70, 'VOLM' 20;
+}
+.titre-3 {
+  font-size: var(--t-subtitle);
+  line-height: 1.3;
+  font-weight: 600;
+  font-variation-settings: 'FLAR' 20;
+}
+.chapeau {
+  margin: 0;
+  font-size: clamp(17px, 1.5vw, 20px);
+  line-height: 1.55;
+  color: var(--encre-douce);
+  max-width: 52ch;
+  text-wrap: pretty;
+}
+.texte {
+  margin: 0;
+  color: var(--encre-douce);
+}
+.bouton-contour {
+  background: transparent;
+  color: var(--encre);
+  border-color: var(--trait);
+}
+@media (hover: hover) and (pointer: fine) {
+  .bouton-contour:hover {
+    opacity: 1;
+    border-color: var(--encre-douce);
+  }
+}
+.boite-logo {
+  border-radius: 30%;
+  overflow: hidden;
+}
+.boite-logo svg {
+  width: 100%;
+  height: 100%;
+}
+/* Les scènes épinglées d'avant sont posées à plat : tout est à l'état final. */
+.scene {
+  position: relative;
+  height: auto !important;
+}
+.epingle {
+  position: relative;
+  padding: var(--e-9) 0 0;
+}
+.bloc {
+  padding: var(--e-9) 0 0;
+}
+.bloc-sombre {
+  background: none;
+}
+.centre {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+}
+.surtitre-page {
+  padding: var(--e-8) 0 0;
+}
+.mots span {
+  opacity: 1 !important;
+}
+.halo,
+.dl-halo,
+.finale-lumiere {
+  display: none !important;
 }

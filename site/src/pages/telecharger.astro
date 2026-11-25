@@ -47,10 +47,10 @@ import { APK, APK_ANCIENS } from '../site';
   .dl-scene { height: 200vh; }
   .dl-halo { position: absolute; left: 50%; top: 44%; width: 900px; height: 900px; transform: translate(-50%, -50%); background: radial-gradient(closest-side, rgba(200,204,212, calc(0.05 + var(--a, 1) * 0.1)), transparent 70%); }
   .dl { position: relative; }
-  .dl-logo { width: clamp(120px, 22vh, 200px); aspect-ratio: 1; box-shadow: 0 40px 100px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.08); transform: perspective(900px) rotateX(calc((1 - var(--a, 1)) * 40deg)) translateY(calc((1 - var(--a, 1)) * 60px)); }
+  .dl-logo { width: clamp(120px, 22vh, 200px); aspect-ratio: 1; box-shadow: 0 0 0 transparent, 0 0 0 1px color-mix(in srgb, var(--encre) 8%, transparent); transform: perspective(900px) rotateX(calc((1 - var(--a, 1)) * 40deg)) translateY(calc((1 - var(--a, 1)) * 60px)); }
   .installer { list-style: none; padding: 0; margin: 48px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
   @media (max-width: 860px) { .installer { grid-template-columns: 1fr; } }
   .installer li { background: var(--graphite); border: 1px solid var(--trait); border-radius: 24px; padding: 28px 24px; display: flex; flex-direction: column; gap: 18px; }
-  .installer li > span { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 600 16px/1 var(--titres); background: var(--metal); color: #0e0f12; }
+  .installer li > span { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 600 16px/1 var(--titres); background: var(--metal); color: var(--sur-encre); }
   .installer div { display: flex; flex-direction: column; gap: 10px; }
 </style>

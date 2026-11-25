@@ -66,14 +66,14 @@ const titre = ['Se', 'connecter', 'avec', 'Droplet', 'ID.'];
   .messages { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; position: relative; }
   .messages::before { content: ''; position: absolute; left: calc(100% / 6); right: calc(100% / 6); top: -14px; bottom: 0; background:
     linear-gradient(var(--trait), var(--trait)) 0 0 / 1px 100% no-repeat, linear-gradient(var(--trait), var(--trait)) 50% 0 / 1px 100% no-repeat, linear-gradient(var(--trait), var(--trait)) 100% 0 / 1px 100% no-repeat; }
-  .m { position: relative; display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 16px; background: linear-gradient(180deg, #1d1e23, #15161a); border: 1px solid var(--trait); font-size: 15px;
+  .m { position: relative; display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--trait); font-size: 15px;
     --q: clamp(0, var(--f, 1) * 4.4 - var(--i), 1); opacity: var(--q); }
-  .m b { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--metal); color: #0e0f12; font-size: 13px; }
+  .m b { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--metal); color: var(--sur-encre); font-size: 13px; }
   .m1 { width: 50%; margin-left: calc(100% / 6); transform: translateX(calc((1 - var(--q)) * -40px)); }
   .m2 { width: 50%; margin-left: calc(100% / 6); transform: translateX(calc((1 - var(--q)) * 40px)); }
   .m3 { width: 50%; margin-left: calc(100% / 3); transform: translateX(calc((1 - var(--q)) * 40px)); }
   .m4 { width: 50%; margin-left: calc(100% / 6); transform: translateX(calc((1 - var(--q)) * -40px)); }
-  .m4 { border-color: rgba(255,255,255,.3); }
+  .m4 { border-color: color-mix(in srgb, var(--encre) 30%, transparent); }
   @media (max-width: 700px) { .m1, .m2, .m3, .m4 { width: 100%; margin-left: 0; } .acteurs { font-size: 12px; } .messages::before { display: none; } }
   .grille-dev { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
   @media (max-width: 860px) { .grille-dev { grid-template-columns: 1fr; } }

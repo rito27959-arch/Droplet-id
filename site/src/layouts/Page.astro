@@ -1,10 +1,10 @@
 ---
 // ============================================================================
-// LE GABARIT COMMUN — tête, barre de navigation, pied, fin cinématique.
-// Toutes les pages du site passent par lui.
+// LE GABARIT COMMUN — Droplet Design Language, la même structure que les
+// autres sites Droplet : barre plate (un filet d'un pixel apparaît au
+// défilement), panneau « Produits » avec toute la famille, menu plein écran
+// sur téléphone, pied en plan du site. Toutes les pages passent par lui.
 // ============================================================================
-import '@fontsource-variable/inter-tight';
-import '@fontsource-variable/inter';
 import '../styles/global.css';
 import Finale from '../components/Finale.astro';
 import { APK, SOURCES, lien } from '../site';
@@ -17,6 +17,12 @@ const pages = [
   ['developpeurs', 'Développeurs'],
   ['aide', 'Aide'],
 ];
+const produits = [
+  { nom: 'Droplet', phrase: 'La messagerie qui marche sans réseau.', plateforme: 'Android', href: 'https://dropletmesh.app/' },
+  { nom: 'Droplet Web', phrase: 'Vos discussions, sur grand écran.', plateforme: 'Navigateur', href: 'https://web.dropletmesh.app' },
+  { nom: 'Droplet Drop', phrase: 'Vos fichiers, à tous les appareils autour de vous.', plateforme: 'Android, Windows, Mac et Linux', href: 'https://drop.dropletmesh.app/' },
+  { nom: 'Droplet ID', phrase: "Se connecter d'un geste, sans mot de passe.", plateforme: 'Android 12+', href: lien('/'), ici: true },
+];
 const titreComplet = titre.includes('Droplet ID') ? titre : `${titre} · Droplet ID`;
 ---
 <!doctype html>
@@ -26,27 +32,80 @@ const titreComplet = titre.includes('Droplet ID') ? titre : `${titre} · Droplet
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>{titreComplet}</title>
   <meta name="description" content={description} />
-  <meta name="theme-color" content="#050506" />
+  <meta name="theme-color" content="#e6eaee" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#05070a" media="(prefers-color-scheme: dark)" />
+  <meta name="color-scheme" content="light dark" />
   <link rel="icon" href={lien('/logo.svg')} type="image/svg+xml" />
   <meta property="og:title" content={titreComplet} />
   <meta property="og:description" content={description} />
   <meta property="og:type" content="website" />
   <meta property="og:image" content={new URL(lien('/apercu.png'), Astro.site)} />
+  <!-- Le thème, posé AVANT le premier affichage : choix mémorisé, sinon celui du système. -->
+  <script is:inline>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('theme'); } catch (e) {}
+      if (t !== 'dark' && t !== 'light') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
 </head>
 <body>
   <a class="aller-contenu" href="#contenu">Aller au contenu</a>
-  <header class="nav">
-    <div class="conteneur nav-ligne">
-      <a class="marque" href={lien('/')} aria-label="Droplet ID, accueil">
-        <img src={lien('/logo.svg')} alt="" width="28" height="28" />
+  <header class="barre" data-barre>
+    <div class="barre__dedans contenu--large">
+      <a class="barre__marque" href={lien('/')} aria-label="Droplet ID, accueil">
+        <img src={lien('/logo.svg')} alt="" width="24" height="24" />
         <span>Droplet ID</span>
       </a>
-      <nav aria-label="Pages">
-        {pages.map(([p, t]) => <a href={lien(`/${p}/`)} aria-current={courant === p ? 'page' : undefined}>{t}</a>)}
+      <nav class="barre__liens" aria-label="Pages">
+        <button class="barre__lien" type="button" aria-expanded="false" aria-controls="panneau-produits" data-ouvre="panneau-produits">
+          Produits
+          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </button>
+        {pages.map(([p, t]) => <a class="barre__lien" href={lien(`/${p}/`)} aria-current={courant === p ? 'page' : undefined}>{t}</a>)}
       </nav>
-      <a class="nav-action" href={lien('/telecharger/')}>Télécharger</a>
+      <div class="barre__actions">
+        <button class="barre__icone" type="button" aria-label="Passer au thème sombre" data-theme-toggle>
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7">
+            <circle cx="12" cy="12" r="8" />
+            <path d="M12 4a8 8 0 0 0 0 16Z" fill="currentColor" stroke="none" />
+          </svg>
+        </button>
+        <a class="bouton bouton--petit barre__telecharger" href={lien('/telecharger/')}>Télécharger</a>
+        <button class="barre__menu" type="button" aria-expanded="false" aria-controls="panneau-mobile" data-ouvre="panneau-mobile">Menu</button>
+      </div>
     </div>
-    <div class="progression" aria-hidden="true"></div>
+
+    <div class="panneau" id="panneau-produits" hidden>
+      <ul class="contenu--large panneau__produits">
+        {produits.map((p) => (
+          <li>
+            <a class="panneau__produit" href={p.href} aria-current={p.ici ? 'page' : undefined}>
+              <span class="subtitle">{p.nom}</span>
+              <span class="caption">{p.phrase}</span>
+              <span class="technique doux">{p.plateforme}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="contenu--large panneau__labs caption">
+        <a href="https://labs.dropletmesh.app/">Droplet Labs</a><span> Le laboratoire qui fait Droplet.</span>
+      </p>
+    </div>
+
+    <div class="panneau panneau--plein" id="panneau-mobile" hidden>
+      <div class="contenu--large panneau__plein">
+        <p class="caption">Produits</p>
+        <ul class="panneau__liste">
+          {produits.map((p) => <li><a class="title" href={p.href}>{p.nom}</a></li>)}
+        </ul>
+        <ul class="panneau__liste panneau__liste--secondaire">
+          {pages.map(([p, t]) => <li><a class="subtitle" href={lien(`/${p}/`)}>{t}</a></li>)}
+        </ul>
+        <a class="bouton" href={APK}>Télécharger pour Android</a>
+      </div>
+    </div>
   </header>
 
   <main id="contenu">
@@ -55,45 +114,126 @@ const titreComplet = titre.includes('Droplet ID') ? titre : `${titre} · Droplet
   </main>
 
   <footer class="pied">
-    <div class="conteneur pied-grille">
-      <div class="pied-marque">
-        <img src={lien('/logo.svg')} alt="" width="36" height="36" />
-        <p>Droplet ID est l'identité de la famille Droplet. Il est en test et n'est pas encore sur le Play Store.</p>
+    <div class="contenu--large pied__grille">
+      <div class="pied__marque">
+        <img src={lien('/logo.svg')} alt="" width="28" height="28" />
+        <p class="caption">Droplet ID est l'identité de la famille Droplet. Il est en test et n'est pas encore sur le Play Store.</p>
       </div>
-      <div><h2>Découvrir</h2><a href={lien('/fonctionnement/')}>Fonctionnement</a><a href={lien('/securite/')}>Sécurité</a><a href={lien('/telecharger/')}>Télécharger</a></div>
-      <div><h2>Construire</h2><a href={lien('/developpeurs/')}>Développeurs</a><a href={SOURCES}>Code source</a></div>
-      <div><h2>Aide et règles</h2><a href={lien('/aide/')}>Questions fréquentes</a><a href={lien('/confidentialite/')}>Confidentialité</a><a href={lien('/conditions/')}>Conditions</a></div>
+      <div><h2 class="label">Découvrir</h2><a href={lien('/fonctionnement/')}>Fonctionnement</a><a href={lien('/securite/')}>Sécurité</a><a href={lien('/telecharger/')}>Télécharger</a></div>
+      <div><h2 class="label">Construire</h2><a href={lien('/developpeurs/')}>Développeurs</a><a href={SOURCES}>Code source</a></div>
+      <div><h2 class="label">Aide et règles</h2><a href={lien('/aide/')}>Questions fréquentes</a><a href={lien('/confidentialite/')}>Confidentialité</a><a href={lien('/conditions/')}>Conditions</a></div>
+      <div><h2 class="label">La famille Droplet</h2>{produits.filter((p) => !p.ici).map((p) => <a href={p.href}>{p.nom}</a>)}<a href="https://labs.dropletmesh.app/">Droplet Labs</a></div>
     </div>
-    <div class="conteneur pied-bas"><span>© 2026 Droplet</span><a href={APK}>APK direct</a></div>
+    <div class="contenu--large pied__bas caption"><span>© 2026 Droplet</span><a href={APK}>APK direct</a></div>
   </footer>
 
-  <script>import '../scripts/moteur';</script>
+  <script>
+    import '../scripts/moteur';
+    const barre = document.querySelector<HTMLElement>('[data-barre]')!;
+    const sync = () => barre.classList.toggle('est-defilee', scrollY > 8);
+    addEventListener('scroll', sync, { passive: true });
+    sync();
+
+    // Panneaux : un seul ouvert à la fois ; Échap ou un clic ailleurs ferme.
+    const boutons = [...barre.querySelectorAll<HTMLButtonElement>('[data-ouvre]')];
+    const fermer = () =>
+      boutons.forEach((b) => {
+        b.setAttribute('aria-expanded', 'false');
+        document.getElementById(b.dataset.ouvre!)!.hidden = true;
+      });
+    const toutFermer = () => {
+      fermer();
+      barre.classList.remove('a-panneau');
+      document.documentElement.classList.remove('sans-defilement');
+    };
+    boutons.forEach((b) =>
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const panneau = document.getElementById(b.dataset.ouvre!)!;
+        const ouvrir = panneau.hidden;
+        fermer();
+        panneau.hidden = !ouvrir;
+        b.setAttribute('aria-expanded', String(ouvrir));
+        barre.classList.toggle('a-panneau', ouvrir);
+        document.documentElement.classList.toggle('sans-defilement', ouvrir && b.dataset.ouvre === 'panneau-mobile');
+      }),
+    );
+    document.addEventListener('click', (e) => {
+      if (!(e.target as HTMLElement).closest('.panneau')) toutFermer();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      const ouvert = boutons.find((b) => b.getAttribute('aria-expanded') === 'true');
+      toutFermer();
+      ouvert?.focus();
+    });
+
+    // Thème clair ou sombre, mémorisé.
+    const theme = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+    const libelle = () => {
+      const sombre = document.documentElement.dataset.theme === 'dark';
+      theme?.setAttribute('aria-label', sombre ? 'Passer au thème clair' : 'Passer au thème sombre');
+    };
+    libelle();
+    theme?.addEventListener('click', () => {
+      const suivant = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = suivant;
+      try {
+        localStorage.setItem('theme', suivant);
+      } catch {}
+      libelle();
+    });
+  </script>
 </body>
 </html>
 
 <style>
-  .aller-contenu { position: absolute; left: 12px; top: -60px; z-index: 50; background: #fff; color: #000; padding: 10px 14px; border-radius: 10px; }
+  .aller-contenu { position: absolute; left: 12px; top: -60px; z-index: 60; background: var(--encre); color: var(--sur-encre); padding: 10px 14px; border-radius: var(--r-controle); }
   .aller-contenu:focus { top: 12px; }
-  .nav { position: sticky; top: 0; z-index: 30; background: rgba(5,5,6,.72); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); border-bottom: 1px solid var(--trait); view-transition-name: nav; }
-  .nav-ligne { display: flex; align-items: center; gap: 24px; height: 56px; }
-  .marque { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 600 16px/1 var(--titres); letter-spacing: -0.01em; }
-  .marque img { border-radius: 8px; }
-  nav { display: flex; gap: 22px; margin-left: auto; }
-  nav a { color: var(--argent-2); text-decoration: none; font-size: 14px; position: relative; }
-  nav a:hover, nav a[aria-current] { color: var(--argent); }
-  nav a[aria-current]::after { content: ''; position: absolute; left: 0; right: 0; bottom: -19px; height: 1px; background: var(--argent); }
-  .nav-action { font-size: 14px; font-weight: 600; text-decoration: none; padding: 8px 14px; border-radius: 999px; background: var(--metal); color: #0e0f12; }
-  .progression { position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: linear-gradient(90deg, #8e939a, #fff); transform-origin: left; transform: scaleX(0); }
-  @media (max-width: 720px) { nav { display: none; } .nav-action { margin-left: auto; } }
 
-  .pied { border-top: 1px solid var(--trait); padding: 56px 0 40px; font-size: 14px; color: var(--argent-3); background: var(--noir); position: relative; z-index: 2; }
-  .pied-grille { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 32px; }
-  @media (max-width: 760px) { .pied-grille { grid-template-columns: 1fr 1fr; } .pied-marque { grid-column: 1 / -1; } }
-  .pied-marque img { border-radius: 10px; margin-bottom: 14px; }
-  .pied-marque p { margin: 0; max-width: 34ch; color: var(--argent-2); }
-  .pied h2 { font: 600 13px/1 var(--texte); color: var(--argent); margin: 0 0 14px; }
-  .pied-grille > div:not(.pied-marque) { display: flex; flex-direction: column; gap: 10px; }
-  .pied a { color: var(--argent-2); text-decoration: none; }
-  .pied a:hover { color: var(--argent); }
-  .pied-bas { display: flex; gap: 24px; margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--trait); font-size: 13px; }
+  .barre { position: sticky; top: 0; z-index: 50; background: var(--fond); transition: box-shadow 150ms ease; }
+  .barre.est-defilee, .barre.a-panneau { box-shadow: 0 1px 0 var(--trait); }
+  .barre__dedans { display: flex; align-items: center; gap: var(--e-6); height: 64px; }
+  .barre__marque { display: inline-flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 700; letter-spacing: -0.02em; font-variation-settings: 'FLAR' 100, 'VOLM' 40; text-decoration: none; }
+  .barre__marque img { border-radius: 7px; }
+  .barre__liens { display: flex; gap: var(--e-5); }
+  .barre__lien { display: inline-flex; align-items: center; gap: 6px; padding: 8px 0; border: 0; background: none; color: var(--encre-douce); font: 500 15px var(--police); text-decoration: none; cursor: pointer; transition: color 120ms ease; }
+  .barre__lien:hover, .barre__lien[aria-expanded='true'], .barre__lien[aria-current='page'] { color: var(--encre); }
+  .barre__lien svg { transition: transform 180ms var(--sortie); }
+  .barre__lien[aria-expanded='true'] svg { transform: rotate(180deg); }
+  .barre__actions { display: flex; align-items: center; gap: var(--e-2); margin-inline-start: auto; }
+  .barre__icone { width: 40px; height: 40px; display: grid; place-items: center; border: 0; border-radius: 50%; background: none; color: var(--encre); cursor: pointer; }
+  .barre__icone:hover { background: color-mix(in srgb, var(--encre) 7%, transparent); }
+  .barre__menu { display: none; height: 40px; padding: 0 14px; border: 1px solid var(--trait); border-radius: var(--r-pilule); background: none; color: var(--encre); font: 600 14px var(--police); cursor: pointer; }
+
+  .panneau { position: absolute; inset: 100% 0 auto 0; background: var(--fond); box-shadow: 0 1px 0 var(--trait), 0 24px 40px -24px rgb(0 0 0 / 0.25); transform-origin: top center; animation: panneau 180ms var(--sortie); }
+  @keyframes panneau { from { opacity: 0; transform: translateY(-6px) scale(0.985); } }
+  .panneau__produits { list-style: none; padding: var(--e-5) 0 var(--e-3); margin-block: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .panneau__produits li + li { border-inline-start: 1px solid var(--trait); }
+  .panneau__produit { display: grid; gap: 6px; align-content: start; height: 100%; padding: var(--e-3) var(--e-4); border-radius: var(--r-controle); text-decoration: none; transition: background-color 120ms ease; }
+  .panneau__produit:hover, .panneau__produit:focus-visible { background: color-mix(in srgb, var(--encre) 5%, transparent); }
+  .panneau__labs { padding-bottom: var(--e-5); padding-inline: var(--e-4); }
+  .panneau__labs a { color: var(--encre); font-weight: 600; }
+  .panneau--plein { position: fixed; inset: 64px 0 0 0; overflow-y: auto; animation-duration: 240ms; }
+  .panneau__plein { display: grid; gap: var(--e-5); padding-block: var(--e-5) var(--e-8); }
+  .panneau__liste { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e-3); }
+  .panneau__liste a { text-decoration: none; }
+  .panneau__liste--secondaire { padding-top: var(--e-4); border-top: 1px solid var(--trait); }
+  @media (max-width: 900px) {
+    .barre__liens, .barre__telecharger { display: none; }
+    .barre__menu { display: inline-block; }
+  }
+  @media (min-width: 901px) { #panneau-mobile { display: none !important; } }
+
+  .pied { margin-top: var(--e-9); border-top: 1px solid var(--trait); padding: var(--e-7) 0 var(--e-6); font-size: 14px; }
+  .pied__grille { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: var(--e-6); }
+  .pied__grille > div:not(.pied__marque) { display: flex; flex-direction: column; gap: 10px; }
+  .pied__marque { display: grid; gap: var(--e-3); align-content: start; }
+  .pied__marque img { border-radius: 7px; }
+  .pied__marque p { max-width: 34ch; }
+  .pied h2 { margin: 0 0 4px; }
+  .pied a { color: var(--encre-douce); text-decoration: none; }
+  .pied a:hover { color: var(--encre); }
+  .pied__bas { display: flex; gap: var(--e-5); margin-top: var(--e-7); padding-top: var(--e-4); border-top: 1px solid var(--trait); }
+  @media (max-width: 900px) { .pied__grille { grid-template-columns: 1fr 1fr; } .pied__marque { grid-column: 1 / -1; } }
 </style>

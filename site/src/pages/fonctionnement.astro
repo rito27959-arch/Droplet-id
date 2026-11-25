@@ -105,31 +105,31 @@ const titre = ['Quatre', 'gestes.', 'Aucun', 'mot', 'de', 'passe.'];
   html:not(.anime) .rail { flex-direction: column; width: auto; transform: none; }
   .panneau { position: relative; width: 100vw; height: 100%; flex: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 6vw; padding: 0 max(20px, calc((100vw - 1120px) / 2)); }
   @media (max-width: 860px) { .panneau { grid-template-columns: 1fr; align-content: center; gap: 36px; } }
-  .grand-num { position: absolute; right: 4vw; top: 50%; transform: translateY(-50%); font: 800 clamp(160px, 34vw, 520px)/1 var(--titres); letter-spacing: -0.06em; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,.07); pointer-events: none; }
+  .grand-num { position: absolute; right: 4vw; top: 50%; transform: translateY(-50%); font: 800 clamp(160px, 34vw, 520px)/1 var(--titres); letter-spacing: -0.06em; color: transparent; -webkit-text-stroke: 1px color-mix(in srgb, var(--encre) 7%, transparent); pointer-events: none; }
   .panneau-texte { position: relative; display: flex; flex-direction: column; gap: 20px; }
-  .maquette { position: relative; justify-self: center; width: min(380px, 80vw); aspect-ratio: 1; border-radius: 40px; background: linear-gradient(180deg, #1d1e23, #111215); border: 1px solid var(--trait); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; overflow: hidden; }
-  .maquette svg { width: 72px; height: 72px; fill: none; stroke: #fff; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .maquette { position: relative; justify-self: center; width: min(380px, 80vw); aspect-ratio: 1; border-radius: 40px; background: var(--surface); border: 1px solid var(--trait); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; overflow: hidden; }
+  .maquette svg { width: 72px; height: 72px; fill: none; stroke: var(--encre); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
   .maquette span { color: var(--argent-2); font-size: 14px; }
-  .cle-anneau { position: absolute; width: 140px; height: 140px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18); animation: onde 3s var(--courbe) infinite; }
+  .cle-anneau { position: absolute; width: 140px; height: 140px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--encre) 18%, transparent); animation: onde 3s var(--courbe) infinite; }
   .cle-anneau.r2 { animation-delay: 1s; } .cle-anneau.r3 { animation-delay: 2s; }
   @keyframes onde { from { transform: scale(.6); opacity: 1; } to { transform: scale(2.2); opacity: 0; } }
   .maquette-cle svg, .maquette-cle span { position: relative; }
   .maquette-cle span { position: absolute; bottom: 36px; }
-  .code-grand { font: 700 54px/1 var(--titres) !important; color: #fff !important; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
-  .code-ok { display: inline-flex; gap: 8px; align-items: center; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,.06); }
-  .code-ok::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+  .code-grand { font: 700 54px/1 var(--titres) !important; color: var(--encre) !important; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+  .code-ok { display: inline-flex; gap: 8px; align-items: center; padding: 8px 14px; border-radius: 999px; background: color-mix(in srgb, var(--encre) 6%, transparent); }
+  .code-ok::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--encre); }
   .maquette-retour { flex-direction: row; gap: 20px; flex-wrap: wrap; }
   .maquette-retour img { border-radius: 18px; }
-  .fleche { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, #fff); position: relative; }
-  .fleche::after { content: ''; position: absolute; right: 0; top: -4px; border: 4px solid transparent; border-left-color: #fff; }
-  .retour-texte { width: 100%; text-align: center; color: #fff !important; font-weight: 600; font-size: 16px !important; }
+  .fleche { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, var(--encre)); position: relative; }
+  .fleche::after { content: ''; position: absolute; right: 0; top: -4px; border: 4px solid transparent; border-left-color: var(--encre); }
+  .retour-texte { width: 100%; text-align: center; color: var(--encre) !important; font-weight: 600; font-size: 16px !important; }
   .maquette-liste { padding: 24px; gap: 10px; align-items: stretch; }
-  .maquette-liste div { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; background: rgba(255,255,255,.04); }
+  .maquette-liste div { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; background: color-mix(in srgb, var(--encre) 4%, transparent); }
   .maquette-liste img { border-radius: 9px; }
   .maquette-liste span { flex: 1; color: var(--argent) !important; font-weight: 600; }
-  .maquette-liste b { background: var(--rouge); color: #fff; font-size: 12px; padding: 6px 10px; border-radius: 999px; }
+  .maquette-liste b { background: none; color: var(--rouge); font-size: 12px; padding: 6px 10px; border-radius: 999px; }
   .rail-repere { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); width: 160px; height: 2px; background: var(--graphite-2); border-radius: 2px; overflow: hidden; }
-  .rail-repere span { display: block; height: 100%; background: #fff; transform-origin: left; transform: scaleX(var(--r, 1)); }
+  .rail-repere span { display: block; height: 100%; background: var(--encre); transform-origin: left; transform: scaleX(var(--r, 1)); }
   .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
   @media (max-width: 760px) { .compare { grid-template-columns: 1fr; } }
   .compare ul { list-style: none; padding: 0; margin: 28px 0 0; display: flex; flex-direction: column; gap: 14px; font-size: 18px; }
@@ -137,4 +137,7 @@ const titre = ['Quatre', 'gestes.', 'Aucun', 'mot', 'de', 'passe.'];
   .liste-oui li::before { content: ''; width: 18px; height: 18px; flex: none; border-radius: 50%; background: var(--metal); }
   .liste-non li { color: var(--argent-2); }
   .liste-non li::before { content: ''; width: 18px; height: 2px; flex: none; background: var(--rouge); }
+  /* Droplet Design Language : pas de boucle décorative, pas de chiffres géants. */
+  .cle-anneau, .grand-num, .rail-repere { display: none; }
+  .panneau { padding-block: var(--e-8) 0; }
 </style>
